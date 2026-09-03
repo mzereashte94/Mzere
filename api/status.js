@@ -1,114 +1,40 @@
-name: Premium Cloud Signer Engine (Ultra Fast)
+export default async function handler(req, res) {
+    const { build_id, app } = req.query;
+    const GITHUB_TOKEN = process.env.GITHUB_PAT;
+    const GITHUB_REPO = process.env.GITHUB_REPO;
 
-on:
-  repository_dispatch:
-    types: [trigger-sign]
+    try {
+        // دەگەڕێین بەدوای ڕیلیسی V1 کە دیاریمان کردووە
+        const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/tags/V1`, {
+            headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+        });
 
-jobs:
-  build_and_sign:
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⚡ Fast Checkout
-        uses: actions/checkout@v4
-        with:
-          show-progress: false
-          fetch-depth: 1
-          sparse-checkout: |
-            icons
-            cert
+        if (response.status === 200) {
+            const data = await response.json();
+            
+            // دۆزینەوەی ناوی فایلەکە بەپێی ئەپەکە
+            const expectedIpaName = app.toLowerCase() === 'esign' ? 'ESign_signed.ipa' : `${app}_signed.ipa`;
+            const ipaAsset = data.assets.find(asset => asset.name === expectedIpaName);
 
-      - name: 🚀 Ultra Fast Production Sign
-        env:
-          APP_NAME: ${{ github.event.client_payload.app_name }}
-          USE_FREE_CERT: ${{ github.event.client_payload.use_free_cert }}
-          P12_BASE64: ${{ github.event.client_payload.p12_base64 }}
-          PROV_BASE64: ${{ github.event.client_payload.prov_base64 }}
-          CUSTOM_PASSWORD: ${{ github.event.client_payload.password }}
-          BUILD_ID: ${{ github.event.client_payload.build_id }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-        run: |
-          set -euo pipefail
+            if (ipaAsset) {
+                const assetTime = new Date(ipaAsset.updated_at).getTime();
+                const buildTime = parseInt(build_id);
 
-          # 1. تخطي حماية الشهادات لـ Ubuntu-latest (OpenSSL 3 Bypass)
-          cat << 'EOF' > /tmp/custom_openssl.cnf
-          openssl_conf = openssl_init
-          [openssl_init]
-          providers = provider_sect
-          [provider_sect]
-          default = default_sect
-          legacy = legacy_sect
-          [default_sect]
-          activate = 1
-          [legacy_sect]
-          activate = 1
-          EOF
-          export OPENSSL_CONF=/tmp/custom_openssl.cnf
-          
-          # 2. تحديد الأسماء
-          if [[ "$APP_NAME" == "ESign" ]]; then IPA_NAME="esign_5.0.2_unsigned.ipa"; ICON_NAME="IMG_1419.jpeg";
-          elif [[ "$APP_NAME" == "KSign" ]]; then IPA_NAME="Ksign.7.ipa"; ICON_NAME="IMG_1416.jpeg";
-          elif [[ "$APP_NAME" == "Feather" ]]; then IPA_NAME="Feather.ipa"; ICON_NAME="IMG_1421.jpeg";
-          elif [[ "$APP_NAME" == "Scarlet" ]]; then IPA_NAME="Scarlet.ipa"; ICON_NAME="IMG_1420.jpeg";
-          elif [[ "$APP_NAME" == "GBox" ]]; then IPA_NAME="GBox_v5.7.6.ipa"; ICON_NAME="IMG_1417.jpeg"; fi
-
-          # 3. تنفيذ المهام بالتوازي لأقصى سرعة (Parallel Execution)
-          (
-            wget -qO- https://github.com/zhlynn/zsign/releases/download/v1.0.4/zsign-linux-x86_64.tar.gz | tar -xz
-            chmod +x zsign
-          ) &
-          
-          (
-            gh release download V1 -p "$IPA_NAME" --repo ${{ github.repository }} > /dev/null 2>&1
-            mv "$IPA_NAME" raw_app.ipa
-          ) &
-          
-          (
-            cp "$GITHUB_WORKSPACE/icons/$ICON_NAME" downloaded_icon.png
-            if [[ "$USE_FREE_CERT" == "true" ]]; then
-              cp "$GITHUB_WORKSPACE/cert/cert.p12" ./cert.p12
-              cp "$GITHUB_WORKSPACE/cert/profile.mobileprovision" ./profile.mobileprovision
-            else
-              echo "$P12_BASE64" | tr -d ' \n\r' | base64 -d > cert.p12
-              echo "$PROV_BASE64" | tr -d ' \n\r' | base64 -d > profile.mobileprovision
-            fi
-          ) &
-          
-          # انتظار انتهاء جميع المهام المتوازية (لن يستغرق سوى ثوانٍ معدودة)
-          wait
-
-          # استخراج كلمة المرور
-          if [[ "$USE_FREE_CERT" == "true" ]]; then CERT_PASSWORD=$(cat "$GITHUB_WORKSPACE/cert/pass.txt" | tr -d '\n\r');
-          else CERT_PASSWORD=$(echo "$CUSTOM_PASSWORD" | tr -d '\n\r'); fi
-
-          # 4. الحقن السريع جداً 
-          APP_DIR=$(unzip -Z1 raw_app.ipa | grep -m1 '^Payload/[^/]*.app/')
-          unzip -qq raw_app.ipa "${APP_DIR}Info.plist"
-          mv downloaded_icon.png "${APP_DIR}CustomIpaBlackIcon.png"
-
-          # 5. بايثون محسّن ولحظي
-          python3 -c '
-          import plistlib, sys
-          app_name, app_dir = sys.argv[1], sys.argv[2]
-          plist_path = f"{app_dir}Info.plist"
-          try:
-              with open(plist_path, "rb") as f: pl = plistlib.load(f)
-              print(pl.get("CFBundleIdentifier", f"com.ipablack.{app_name}"))
-              pl["CFBundleIcons"] = {"CFBundlePrimaryIcon": {"CFBundleIconFiles": ["CustomIpaBlackIcon"], "UIPrerenderedIcon": True}}
-              if "CFBundleIcons~ipad" in pl: pl["CFBundleIcons~ipad"] = pl["CFBundleIcons"]
-              with open(plist_path, "wb") as f: plistlib.dump(pl, f)
-          except: print(f"com.ipablack.{app_name}")
-          ' "$APP_NAME" "$APP_DIR" > bundle_id.txt
-
-          if [[ "$APP_NAME" == "Feather" || "$APP_NAME" == "KSign" ]]; then
-            mkdir -p "${APP_DIR}signing-assets/PremiumCert"
-            cp cert.p12 "${APP_DIR}signing-assets/PremiumCert/cert.p12"
-            cp profile.mobileprovision "${APP_DIR}signing-assets/PremiumCert/cert.mobileprovision"
-            echo "$CERT_PASSWORD" > "${APP_DIR}signing-assets/PremiumCert/cert.txt"
-          fi
-
-          # 6. التجميع السريع (Compression 0) والتوقيع
-          zip -q0ur raw_app.ipa Payload
-          ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -o "${APP_NAME}_signed.ipa" raw_app.ipa
-
-          # 7. الرفع المباشر وتحديث الملفات داخل ريليس V1 لضمان التوافق التام مع آيفون
-          gh release upload V1 "${APP_NAME}_signed.ipa" "bundle_id.txt" --clobber --repo ${{ github.repository }}
+                // ئەگەر کاتی نوێکردنەوەی فایلەکە نوێتر بوو لە کاتی کلیککردنەکە، واتە واژۆکردنەکە تەواو بووە!
+                if (assetTime > buildTime) {
+                    const ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/${expectedIpaName}`;
+                    const bundleUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/bundle_id.txt`;
+                    return res.status(200).json({ status: 'done', ipaUrl, bundleUrl });
+                }
+            }
+            
+            // ئەگەر فایلەکە هێشتا نوێ نەبووەتەوە، با سایتەکە بەردەوام بێت لە چاوەڕوانیکردن
+            return res.status(200).json({ status: 'processing' });
+        } else {
+            return res.status(500).json({ error: 'GitHub API error or V1 not found' });
+        }
+    } catch (err) {
+        console.error("Status Check Error:", err);
+        res.status(500).json({ error: 'Server error' });
+    }
+}
