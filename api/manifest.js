@@ -2,9 +2,10 @@ export default async function handler(req, res) {
     const { app } = req.query;
     if (!app) return res.status(400).send('Invalid Request');
 
-    const GITHUB_REPO = process.env.GITHUB_REPO;
+    // لێرەدا ناوی گایتهەبەکەتمان ڕاستەوخۆ نووسی بۆ ئەوەی هەرگیز هەڵە نەکات
+    const GITHUB_REPO = "mzereashte94/Mzere";
     
-    // وەرگرتنی فایلی واژۆکراو ڕاستەوخۆ لە ڕیلیسی V1
+    // دروستکردنی لینکی ڕاستەقینە بۆ داگرتنی فایلەکە لە V1
     let ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/${app}_signed.ipa`;
     if (app.toLowerCase() === 'esign') {
         ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/ESign_signed.ipa`;
