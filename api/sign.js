@@ -1,45 +1,114 @@
-export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+name: Premium Cloud Signer Engine (Ultra Fast)
 
-    // 1. استخراج المتغير الجديد (use_free_cert) من الطلب
-    const { app, password, p12, prov, use_free_cert } = req.body;
-    const GITHUB_TOKEN = process.env.GITHUB_PAT;
-    const GITHUB_REPO = process.env.GITHUB_REPO;
-    const buildId = Date.now().toString();
+on:
+  repository_dispatch:
+    types: [trigger-sign]
 
-    try {
-        const githubRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/dispatches`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/vnd.github.v3+json',
-                'Authorization': `token ${GITHUB_TOKEN}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                event_type: 'trigger-sign',
-                client_payload: {
-                    app_name: app,
-                    // 2. إذا كانت الشهادة مجانية، نرسل قيماً فارغة لتجنب أخطاء undefined
-                    password: password || "",
-                    p12_base64: p12 || "",
-                    prov_base64: prov || "",
-                    // 3. تحويل المتغير إلى نص (String) ليتطابق مع شروط Bash في GitHub Actions
-                    use_free_cert: use_free_cert ? "true" : "false",
-                    build_id: buildId
-                }
-            })
-        });
+jobs:
+  build_and_sign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⚡ Fast Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+          fetch-depth: 1
+          sparse-checkout: |
+            icons
+            cert
 
-        if (!githubRes.ok) {
-            // طباعة الخطأ في سجلات Vercel لتسهيل تتبع أي مشكلة مستقبلاً
-            const errorText = await githubRes.text();
-            console.error("GitHub API Error:", errorText);
-            throw new Error('Engine rejected the request');
-        }
-        
-        res.status(200).json({ build_id: buildId });
-    } catch (error) {
-        console.error("Signing API Error:", error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-}
+      - name: 🚀 Ultra Fast Production Sign
+        env:
+          APP_NAME: ${{ github.event.client_payload.app_name }}
+          USE_FREE_CERT: ${{ github.event.client_payload.use_free_cert }}
+          P12_BASE64: ${{ github.event.client_payload.p12_base64 }}
+          PROV_BASE64: ${{ github.event.client_payload.prov_base64 }}
+          CUSTOM_PASSWORD: ${{ github.event.client_payload.password }}
+          BUILD_ID: ${{ github.event.client_payload.build_id }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        run: |
+          set -euo pipefail
+
+          # 1. تخطي حماية الشهادات لـ Ubuntu-latest (OpenSSL 3 Bypass)
+          cat << 'EOF' > /tmp/custom_openssl.cnf
+          openssl_conf = openssl_init
+          [openssl_init]
+          providers = provider_sect
+          [provider_sect]
+          default = default_sect
+          legacy = legacy_sect
+          [default_sect]
+          activate = 1
+          [legacy_sect]
+          activate = 1
+          EOF
+          export OPENSSL_CONF=/tmp/custom_openssl.cnf
+          
+          # 2. تحديد الأسماء
+          if [[ "$APP_NAME" == "ESign" ]]; then IPA_NAME="esign_5.0.2_unsigned.ipa"; ICON_NAME="IMG_1419.jpeg";
+          elif [[ "$APP_NAME" == "KSign" ]]; then IPA_NAME="Ksign.7.ipa"; ICON_NAME="IMG_1416.jpeg";
+          elif [[ "$APP_NAME" == "Feather" ]]; then IPA_NAME="Feather.ipa"; ICON_NAME="IMG_1421.jpeg";
+          elif [[ "$APP_NAME" == "Scarlet" ]]; then IPA_NAME="Scarlet.ipa"; ICON_NAME="IMG_1420.jpeg";
+          elif [[ "$APP_NAME" == "GBox" ]]; then IPA_NAME="GBox_v5.7.6.ipa"; ICON_NAME="IMG_1417.jpeg"; fi
+
+          # 3. تنفيذ المهام بالتوازي لأقصى سرعة (Parallel Execution)
+          (
+            wget -qO- https://github.com/zhlynn/zsign/releases/download/v1.0.4/zsign-linux-x86_64.tar.gz | tar -xz
+            chmod +x zsign
+          ) &
+          
+          (
+            gh release download V1 -p "$IPA_NAME" --repo ${{ github.repository }} > /dev/null 2>&1
+            mv "$IPA_NAME" raw_app.ipa
+          ) &
+          
+          (
+            cp "$GITHUB_WORKSPACE/icons/$ICON_NAME" downloaded_icon.png
+            if [[ "$USE_FREE_CERT" == "true" ]]; then
+              cp "$GITHUB_WORKSPACE/cert/cert.p12" ./cert.p12
+              cp "$GITHUB_WORKSPACE/cert/profile.mobileprovision" ./profile.mobileprovision
+            else
+              echo "$P12_BASE64" | tr -d ' \n\r' | base64 -d > cert.p12
+              echo "$PROV_BASE64" | tr -d ' \n\r' | base64 -d > profile.mobileprovision
+            fi
+          ) &
+          
+          # انتظار انتهاء جميع المهام المتوازية (لن يستغرق سوى ثوانٍ معدودة)
+          wait
+
+          # استخراج كلمة المرور
+          if [[ "$USE_FREE_CERT" == "true" ]]; then CERT_PASSWORD=$(cat "$GITHUB_WORKSPACE/cert/pass.txt" | tr -d '\n\r');
+          else CERT_PASSWORD=$(echo "$CUSTOM_PASSWORD" | tr -d '\n\r'); fi
+
+          # 4. الحقن السريع جداً 
+          APP_DIR=$(unzip -Z1 raw_app.ipa | grep -m1 '^Payload/[^/]*.app/')
+          unzip -qq raw_app.ipa "${APP_DIR}Info.plist"
+          mv downloaded_icon.png "${APP_DIR}CustomIpaBlackIcon.png"
+
+          # 5. بايثون محسّن ولحظي
+          python3 -c '
+          import plistlib, sys
+          app_name, app_dir = sys.argv[1], sys.argv[2]
+          plist_path = f"{app_dir}Info.plist"
+          try:
+              with open(plist_path, "rb") as f: pl = plistlib.load(f)
+              print(pl.get("CFBundleIdentifier", f"com.ipablack.{app_name}"))
+              pl["CFBundleIcons"] = {"CFBundlePrimaryIcon": {"CFBundleIconFiles": ["CustomIpaBlackIcon"], "UIPrerenderedIcon": True}}
+              if "CFBundleIcons~ipad" in pl: pl["CFBundleIcons~ipad"] = pl["CFBundleIcons"]
+              with open(plist_path, "wb") as f: plistlib.dump(pl, f)
+          except: print(f"com.ipablack.{app_name}")
+          ' "$APP_NAME" "$APP_DIR" > bundle_id.txt
+
+          if [[ "$APP_NAME" == "Feather" || "$APP_NAME" == "KSign" ]]; then
+            mkdir -p "${APP_DIR}signing-assets/PremiumCert"
+            cp cert.p12 "${APP_DIR}signing-assets/PremiumCert/cert.p12"
+            cp profile.mobileprovision "${APP_DIR}signing-assets/PremiumCert/cert.mobileprovision"
+            echo "$CERT_PASSWORD" > "${APP_DIR}signing-assets/PremiumCert/cert.txt"
+          fi
+
+          # 6. التجميع السريع (Compression 0) والتوقيع
+          zip -q0ur raw_app.ipa Payload
+          ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -o "${APP_NAME}_signed.ipa" raw_app.ipa
+
+          # 7. الرفع النهائي
+          gh release create "build-${BUILD_ID}" "${APP_NAME}_signed.ipa" "bundle_id.txt" -t "Cloud Build ${BUILD_ID}" -R ${{ github.repository }}
