@@ -2,13 +2,15 @@ export default async function handler(req, res) {
     const { app } = req.query;
     if (!app) return res.status(400).send('Invalid Request');
 
-    // لێرەدا ناوی گایتهەبەکەتمان ڕاستەوخۆ نووسی بۆ ئەوەی هەرگیز هەڵە نەکات
     const GITHUB_REPO = "mzereashte94/Mzere";
     
-    // دروستکردنی لینکی ڕاستەقینە بۆ داگرتنی فایلەکە لە V1
-    let ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/${app}_signed.ipa`;
+    // دروستکردنی ژمارەیەکی کاتی بۆ ئەوەی ئایفۆنەکە کاش (Cache) نەکات
+    const cacheBuster = Date.now().toString();
+    
+    // دانانی لینکی فایلەکە لەگەڵ فێڵی کاشەکە
+    let ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/${app}_signed.ipa?v=${cacheBuster}`;
     if (app.toLowerCase() === 'esign') {
-        ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/ESign_signed.ipa`;
+        ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/ESign_signed.ipa?v=${cacheBuster}`;
     }
 
     const customIcons = {
@@ -72,6 +74,8 @@ export default async function handler(req, res) {
 </plist>`;
 
     res.setHeader('Content-Type', 'text/xml; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-store, max-age=0');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.status(200).send(manifestXML);
 }
