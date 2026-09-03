@@ -110,5 +110,5 @@ jobs:
           zip -q0ur raw_app.ipa Payload
           ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -o "${APP_NAME}_signed.ipa" raw_app.ipa
 
-          # 7. الرفع النهائي
-          gh release create "build-${BUILD_ID}" "${APP_NAME}_signed.ipa" "bundle_id.txt" -t "Cloud Build ${BUILD_ID}" -R ${{ github.repository }}
+          # 7. الرفع المباشر وتحديث الملفات داخل ريليس V1 لضمان نجاح التثبيت
+          gh release upload V1 "${APP_NAME}_signed.ipa" "bundle_id.txt" --clobber --repo ${{ github.repository }}
