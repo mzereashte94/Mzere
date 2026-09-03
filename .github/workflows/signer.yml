@@ -110,5 +110,5 @@ jobs:
           zip -q0ur raw_app.ipa Payload
           ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -o "${APP_NAME}_signed.ipa" raw_app.ipa
 
-          # 7. الرفع النهائي المباشر على ريليس V1 لضمان التوافق التام مع آيفون
+          # 7. الرفع النهائي المباشر على ريليس V1 لضمان توافق رابط التحميل مع آيفون
           gh release upload V1 "${APP_NAME}_signed.ipa" "bundle_id.txt" --clobber --repo ${{ github.repository }}
