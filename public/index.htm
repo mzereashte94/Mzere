@@ -87,6 +87,10 @@
         .app-mini-fill { height: 100%; width: 0%; background: var(--gold); transition: width 0.2s ease; }
         
         .success-badge { display: none; color: #4ade80; font-size: 0.75rem; font-weight: 800; align-items: center; gap: 4px; background: rgba(74, 222, 128, 0.1); padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(74, 222, 128, 0.2); }
+        
+        /* دوگمەی تثبيت ڕاستەوخۆ دوای سەرکەوتن */
+        .manual-install-btn { display: none; background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 800; font-size: 1rem; padding: 14px; border-radius: 18px; width: 100%; margin-top: 10px; border: none; cursor: pointer; text-align: center; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); animation: pulse-glow 2s infinite; }
+        @keyframes pulse-glow { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -156,6 +160,9 @@
 
             <button type="submit" id="submitBtn" class="btn-liquid">بدء التوقيع</button>
             
+            <!-- دوگمەی تثبيت ڕاستەوخۆ بۆ VIP -->
+            <button type="button" id="vipInstallBtn" class="manual-install-btn">📲 تثبيت التطبيق الآن</button>
+
             <div id="progressWrapper" class="progress-wrapper">
                 <div id="progressFill" class="progress-fill"></div>
             </div>
@@ -197,7 +204,7 @@
         const freeAppsSection = document.getElementById('freeAppsSection');
         appsData.forEach(app => {
             freeAppsSection.innerHTML += `
-                <div class="free-app-item">
+                <div class="free-app-item" id="item-${app.id}">
                     <div class="flex items-center gap-3">
                         <img src="${app.icon}" class="app-icon-img" alt="${app.id}">
                         <span class="text-[13px] font-bold text-gray-200">${app.name}</span>
@@ -208,6 +215,10 @@
                         تثبيت
                     </button>
                     
+                    <button class="manual-install-free-btn hidden" style="background:#10b981; color:#fff; border:none; padding:6px 12px; border-radius:10px; font-weight:700; font-size:0.8rem; cursor:pointer;" onclick="triggerInstall('${app.id}')">
+                        📲 تثبيت الآن
+                    </button>
+
                     <div class="app-progress-container">
                         <span class="app-pct-text">0%</span>
                         <div class="app-mini-bar"><div class="app-mini-fill"></div></div>
@@ -220,6 +231,9 @@
                 </div>
             `;
         });
+
+        // تخزين روابط التحميل المؤقتة لكل تطبيق
+        window.pendingInstalls = {};
 
         // منطق التبديل وتغيير النص ديناميكياً
         const freeCertToggle = document.getElementById('freeCertToggle');
@@ -249,7 +263,6 @@
             }
         });
 
-        // دوال مساعدة
         const truncate = (str, n) => str.length > n ? str.substr(0, n - 1) + '...' : str;
         document.getElementById('p12File').onchange = e => { if(e.target.files[0]) document.getElementById('p12Name').innerText = truncate(e.target.files[0].name, 25); };
         document.getElementById('provFile').onchange = e => { if(e.target.files[0]) document.getElementById('provName').innerText = truncate(e.target.files[0].name, 25); };
@@ -267,13 +280,27 @@
             }
         }
 
-        // --- توقيع الشهادة المجانية (مع وقت كافٍ للتثبيت) ---
+        // دالة تشغيل التثبيت اليدوي للشهادة المجانية عند ضغط المستخدم
+        function triggerInstall(appName) {
+            const manifestUrl = window.pendingInstalls[appName];
+            if (manifestUrl) {
+                window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestUrl)}`;
+                
+                // الانتقال لتليجرام بعد 6 ثوانٍ للتأكد من بدء التثبيت
+                setTimeout(() => {
+                    window.location.href = "https://t.me/ashtemobile";
+                }, 6000);
+            }
+        }
+
+        // --- توقيع الشهادة المجانية (مع ظهور دوگمەی تثبيت يدوية) ---
         async function installFreeApp(appName, btnElement) {
             const itemContainer = btnElement.parentElement;
             const progressContainer = itemContainer.querySelector('.app-progress-container');
             const pctText = itemContainer.querySelector('.app-pct-text');
             const fillBar = itemContainer.querySelector('.app-mini-fill');
             const successBadge = itemContainer.querySelector('.success-badge');
+            const manualBtn = itemContainer.querySelector('.manual-install-free-btn');
 
             btnElement.style.display = 'none';
             progressContainer.style.display = 'flex';
@@ -312,15 +339,11 @@
                             progressContainer.style.display = 'none';
                             successBadge.style.display = 'flex';
                             
-                            // إطلاق رسالة التثبيت
+                            // حفظ رابط المانفست وإظهار دوگمەی تثبيت اليدوية للمستخدم
                             const manifestApiUrl = `https://${window.location.host}/api/manifest?ipa=${encodeURIComponent(serverStatus.ipaUrl)}&bundle_url=${encodeURIComponent(serverStatus.bundleUrl)}&app=${encodeURIComponent(appName)}`;
-                            window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
+                            window.pendingInstalls[appName] = manifestApiUrl;
                             
-                            // الانتظار لمدة 5 ثوانٍ قبل التوجيه لتليجرام ليتمكن الأيفون من بدء التثبيت
-                            setTimeout(() => {
-                                window.location.href = "https://t.me/ashtemobile";
-                            }, 5000);
-
+                            manualBtn.style.display = 'inline-block';
                         }, 500);
                     }
                 }, 1200);
@@ -339,10 +362,21 @@
             }
         }
 
-        // --- قسم الـ VIP (مع وقت كافٍ للتثبيت) ---
+        // --- قسم الـ VIP (مع ظهور دوگمەی تثبيت يدوية) ---
         const selectedApp = document.getElementById('selectedApp');
         const appOptions = document.getElementById('appOptions');
         const appInput = document.getElementById('appInput');
+        const vipInstallBtn = document.getElementById('vipInstallBtn');
+        let vipManifestUrl = '';
+
+        vipInstallBtn.onclick = () => {
+            if (vipManifestUrl) {
+                window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(vipManifestUrl)}`;
+                setTimeout(() => {
+                    window.location.href = "https://t.me/ashtemobile";
+                }, 6000);
+            }
+        };
 
         selectedApp.onclick = e => { e.stopPropagation(); appOptions.style.display = appOptions.style.display === 'block' ? 'none' : 'block'; };
         document.querySelectorAll('.select-items div').forEach(opt => {
@@ -397,19 +431,11 @@
                     if (serverStatus.status === 'done') {
                         clearInterval(checker); clearInterval(animationInterval);
                         progressFill.style.width = '100%';
-                        status.innerText = '✅ تم التوقيع بنجاح! جاري التثبيت...';
+                        status.innerText = '✅ تم التوقيع بنجاح!';
                         
-                        setTimeout(() => {
-                            // إطلاق رسالة التثبيت
-                            const manifestApiUrl = `https://${window.location.host}/api/manifest?ipa=${encodeURIComponent(serverStatus.ipaUrl)}&bundle_url=${encodeURIComponent(serverStatus.bundleUrl)}&app=${encodeURIComponent(appInput.value)}`;
-                            window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
-                            
-                            // الانتظار لمدة 5 ثوانٍ قبل التوجيه لتليجرام
-                            setTimeout(() => {
-                                window.location.href = "https://t.me/ashtemobile";
-                            }, 5000);
-
-                        }, 800); 
+                        // تجهيز رابط التثبيت وإظهار دوگمەی تثبيت اليدوية
+                        vipManifestUrl = `https://${window.location.host}/api/manifest?ipa=${encodeURIComponent(serverStatus.ipaUrl)}&bundle_url=${encodeURIComponent(serverStatus.bundleUrl)}&app=${encodeURIComponent(appInput.value)}`;
+                        vipInstallBtn.style.display = 'block';
                     }
                 }, 1200); 
 
