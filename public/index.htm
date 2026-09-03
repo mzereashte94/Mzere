@@ -74,6 +74,7 @@
             </label>
         </div>
 
+        <!-- بەشی VIP -->
         <form id="signForm" class="premium-section space-y-4">
             <div class="custom-select" id="customSelect">
                 <div class="select-selected" id="selectedApp">
@@ -112,18 +113,23 @@
             <div id="status" class="text-center text-[10px] font-bold hidden text-[var(--gold)] mt-2"></div>
         </form>
 
+        <!-- بەشی الشهادة المجانية (لێرەدا ناوی بڕوانامەکان دەگۆڕیت) -->
         <div id="freeAppsSection" class="free-section" style="display: none;">
-            <!-- بەشی نوێ: هەڵبژاردنی بڕوانامە و داونلۆدی DNS -->
+            
             <div class="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-2xl p-4 mb-2">
                 <label class="text-[12px] font-bold text-gray-300 block mb-2 text-right">اختر الشهادة (بڕوانامە هەڵبژێرە):</label>
                 <select id="freeCertSelect" class="w-full bg-[rgba(0,0,0,0.6)] border border-[rgba(212,175,55,0.3)] rounded-xl p-3 text-[13px] text-white outline-none mb-3 font-bold" style="text-align-last: center;">
-                    <!-- کاتێک فۆڵدەری نوێ دروست دەکەیت لە گایتهەب، تەنها دێڕێک لێرە زیاد بکە -->
-                    <option value="china">China Telecom (Active)</option>
-                    <option value="hsbc">HSBC Bank Plc (Active)</option>
+                    
+                    <!-- ناوی بڕوانامەی یەکەم (Jiangsu Simcere) -->
+                    <option value="jiangsu">Jiangsu Simcere Pharmaceutical</option>
+                    
+                    <!-- ئەگەر بڕوانامەی ترت هەبوو، لێرە زیادی دەکەیت وەک ئەمە -->
+                    <!-- <option value="hsbc">HSBC Bank Plc</option> -->
+                    
                 </select>
 
-                <!-- لێرەدا لینکی DNS ەکەت دابنێ لە جێگەی # -->
-                <a href="#" class="w-full flex items-center justify-center gap-2 rounded-xl p-3 mt-1" style="background: linear-gradient(135deg, #2d3748, #1a202c); border: 1px solid rgba(255,255,255,0.1); color: var(--gold-light); font-size: 0.85rem; font-weight: bold; text-decoration: none;">
+                <!-- لینکی DNS، تکایە لە بری ئەستێرەکان (***) لینکی فایلی DNS ەکەت دابنێ -->
+                <a href="***" class="w-full flex items-center justify-center gap-2 rounded-xl p-3 mt-1" style="background: linear-gradient(135deg, #2d3748, #1a202c); border: 1px solid rgba(255,255,255,0.1); color: var(--gold-light); font-size: 0.85rem; font-weight: bold; text-decoration: none;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     تحميل ملف DNS (منع الإعلانات)
                 </a>
