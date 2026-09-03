@@ -267,7 +267,7 @@
             }
         }
 
-        // --- توقيع الشهادة المجانية ---
+        // --- توقيع الشهادة المجانية (نسخة سريعة مع التليجرام) ---
         async function installFreeApp(appName, btnElement) {
             const itemContainer = btnElement.parentElement;
             const progressContainer = itemContainer.querySelector('.app-progress-container');
@@ -279,6 +279,7 @@
             progressContainer.style.display = 'flex';
 
             let pct = 0;
+            // تسريع حركة العداد الوهمي
             const simInterval = setInterval(() => {
                 if (pct < 95) {
                     pct += Math.floor(Math.random() * 6) + 2; 
@@ -299,6 +300,7 @@
                 const data = await res.json();
                 const buildId = data.build_id;
 
+                // تسريع فحص حالة السيرفر (كل ثانية وربع بدلاً من ثانيتين)
                 const checker = setInterval(async () => {
                     const serverStatus = await checkStatus(buildId, appName);
                     if (serverStatus.status === 'done') {
@@ -312,12 +314,13 @@
                             progressContainer.style.display = 'none';
                             successBadge.style.display = 'flex';
                             
-                            // گۆڕانکاری گرنگ: لینکی مانفێست لێرەدا ڕێکخراوە
-                            const manifestApiUrl = `https://${window.location.host}/api/manifest?app=${encodeURIComponent(appName)}`;
+                            // إطلاق رسالة التثبيت
+                            const manifestApiUrl = `https://${window.location.host}/api/manifest?ipa=${encodeURIComponent(serverStatus.ipaUrl)}&bundle_url=${encodeURIComponent(serverStatus.bundleUrl)}&app=${encodeURIComponent(appName)}`;
                             window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
                             
+                            // توجيه سحري لتليجرام بعد ظهور رسالة التثبيت بثانية ونصف
                             setTimeout(() => {
-                                window.location.href = "https://t.me/hl00ss";
+                                window.location.href = "https://t.me/ashtemobile";
                             }, 1500);
 
                         }, 500);
@@ -338,7 +341,7 @@
             }
         }
 
-        // --- قسم الـ VIP ---
+        // --- قسم الـ VIP (نسخة سريعة مع التليجرام) ---
         const selectedApp = document.getElementById('selectedApp');
         const appOptions = document.getElementById('appOptions');
         const appInput = document.getElementById('appInput');
@@ -385,12 +388,14 @@
                 status.innerText = 'يتم التوقيع الآن...';
                 
                 let simulatedProgress = 0;
+                // تسريع شريط التحميل
                 const animationInterval = setInterval(() => {
                     if (simulatedProgress < 95) simulatedProgress += Math.random() * 6 + 1;
                     if (simulatedProgress > 95) simulatedProgress = 95;
                     progressFill.style.width = simulatedProgress + '%';
                 }, 250);
 
+                // تسريع فحص السيرفر
                 const checker = setInterval(async () => {
                     const serverStatus = await checkStatus(buildId, appInput.value);
                     if (serverStatus.status === 'done') {
@@ -399,12 +404,13 @@
                         status.innerText = '✅ تم التوقيع بنجاح! جاري التثبيت...';
                         
                         setTimeout(() => {
-                            // گۆڕانکاری گرنگ: لینکی مانفێست لێرەدا ڕێکخراوە
-                            const manifestApiUrl = `https://${window.location.host}/api/manifest?app=${encodeURIComponent(appInput.value)}`;
+                            // إطلاق رسالة التثبيت
+                            const manifestApiUrl = `https://${window.location.host}/api/manifest?ipa=${encodeURIComponent(serverStatus.ipaUrl)}&bundle_url=${encodeURIComponent(serverStatus.bundleUrl)}&app=${encodeURIComponent(appInput.value)}`;
                             window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
                             
+                            // توجيه سحري لتليجرام بعد ظهور التثبيت بثانية ونصف
                             setTimeout(() => {
-                                window.location.href = "https://t.me/hl00ss";
+                                window.location.href = "https://t.me/ashtemobile";
                             }, 1500);
 
                         }, 800); 
