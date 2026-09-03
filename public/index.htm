@@ -119,17 +119,16 @@
         <form id="signForm" class="premium-section space-y-4">
             <div class="custom-select" id="customSelect">
                 <div class="select-selected" id="selectedApp">
-                    <img src="https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1419.jpeg" alt="icon">
-                    <span class="text-gray-200">ESign</span>
+                    <img src="https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/Ashtemobile.jpeg" alt="icon">
+                    <span class="text-gray-200">AshteMobile</span>
                 </div>
                 <div class="select-items" id="appOptions">
-                    <div data-value="ESign"><img src="https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1419.jpeg" alt="ESign">ESign</div>
-                    <div data-value="KSign"><img src="https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1416.jpeg" alt="KSign">KSign</div>
-                    <div data-value="Scarlet"><img src="https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1420.jpeg" alt="Scarlet">Scarlet</div>
-                    <div data-value="GBox"><img src="https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1417.jpeg" alt="GBox">GBox</div>
-                    <div data-value="Feather"><img src="https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1421.jpeg" alt="Feather">Feather</div>
+                    <div data-value="AshteMobile"><img src="https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/Ashtemobile.jpeg" alt="AshteMobile">AshteMobile</div>
+                    <div data-value="Esign"><img src="https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/Esign.jpeg" alt="Esign">Esign</div>
+                    <div data-value="Ksign"><img src="https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/Ksign.jpeg" alt="Ksign">Ksign</div>
+                    <div data-value="MyTV"><img src="https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/mytv.jpeg" alt="MyTV">MyTV</div>
                 </div>
-                <input type="hidden" id="appInput" value="ESign" required>
+                <input type="hidden" id="appInput" value="AshteMobile" required>
             </div>
 
             <div class="space-y-2">
@@ -186,11 +185,10 @@
 
         // بيانات التطبيقات بنصوص نظيفة
         const appsData = [
-            { id: 'ESign', name: 'ESign', icon: 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1419.jpeg' },
-            { id: 'KSign', name: 'KSign', icon: 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1416.jpeg' },
-            { id: 'Scarlet', name: 'Scarlet', icon: 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1420.jpeg' },
-            { id: 'GBox', name: 'GBox', icon: 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1417.jpeg' },
-            { id: 'Feather', name: 'Feather', icon: 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1421.jpeg' }
+            { id: 'AshteMobile', name: 'AshteMobile', icon: 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/Ashtemobile.jpeg' },
+            { id: 'Esign', name: 'Esign', icon: 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/Esign.jpeg' },
+            { id: 'Ksign', name: 'Ksign', icon: 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/Ksign.jpeg' },
+            { id: 'MyTV', name: 'MyTV', icon: 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/mytv.jpeg' }
         ];
 
         // بناء قائمة التطبيقات
@@ -267,7 +265,7 @@
             }
         }
 
-        // --- توقيع الشهادة المجانية (نسخة سريعة مع التليجرام) ---
+        // --- توقيع الشهادة المجانية ---
         async function installFreeApp(appName, btnElement) {
             const itemContainer = btnElement.parentElement;
             const progressContainer = itemContainer.querySelector('.app-progress-container');
@@ -279,7 +277,6 @@
             progressContainer.style.display = 'flex';
 
             let pct = 0;
-            // تسريع حركة العداد الوهمي
             const simInterval = setInterval(() => {
                 if (pct < 95) {
                     pct += Math.floor(Math.random() * 6) + 2; 
@@ -300,7 +297,6 @@
                 const data = await res.json();
                 const buildId = data.build_id;
 
-                // تسريع فحص حالة السيرفر (كل ثانية وربع بدلاً من ثانيتين)
                 const checker = setInterval(async () => {
                     const serverStatus = await checkStatus(buildId, appName);
                     if (serverStatus.status === 'done') {
@@ -314,11 +310,9 @@
                             progressContainer.style.display = 'none';
                             successBadge.style.display = 'flex';
                             
-                            // إطلاق رسالة التثبيت
-                            const manifestApiUrl = `https://${window.location.host}/api/manifest?ipa=${encodeURIComponent(serverStatus.ipaUrl)}&bundle_url=${encodeURIComponent(serverStatus.bundleUrl)}&app=${encodeURIComponent(appName)}`;
+                            const manifestApiUrl = `https://${window.location.host}/api/manifest?app=${encodeURIComponent(appName)}`;
                             window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
                             
-                            // توجيه سحري لتليجرام بعد ظهور رسالة التثبيت بثانية ونصف
                             setTimeout(() => {
                                 window.location.href = "https://t.me/ashtemobile";
                             }, 1500);
@@ -341,7 +335,7 @@
             }
         }
 
-        // --- قسم الـ VIP (نسخة سريعة مع التليجرام) ---
+        // --- قسم الـ VIP ---
         const selectedApp = document.getElementById('selectedApp');
         const appOptions = document.getElementById('appOptions');
         const appInput = document.getElementById('appInput');
@@ -388,14 +382,12 @@
                 status.innerText = 'يتم التوقيع الآن...';
                 
                 let simulatedProgress = 0;
-                // تسريع شريط التحميل
                 const animationInterval = setInterval(() => {
                     if (simulatedProgress < 95) simulatedProgress += Math.random() * 6 + 1;
                     if (simulatedProgress > 95) simulatedProgress = 95;
                     progressFill.style.width = simulatedProgress + '%';
                 }, 250);
 
-                // تسريع فحص السيرفر
                 const checker = setInterval(async () => {
                     const serverStatus = await checkStatus(buildId, appInput.value);
                     if (serverStatus.status === 'done') {
@@ -404,11 +396,9 @@
                         status.innerText = '✅ تم التوقيع بنجاح! جاري التثبيت...';
                         
                         setTimeout(() => {
-                            // إطلاق رسالة التثبيت
-                            const manifestApiUrl = `https://${window.location.host}/api/manifest?ipa=${encodeURIComponent(serverStatus.ipaUrl)}&bundle_url=${encodeURIComponent(serverStatus.bundleUrl)}&app=${encodeURIComponent(appInput.value)}`;
+                            const manifestApiUrl = `https://${window.location.host}/api/manifest?app=${encodeURIComponent(appInput.value)}`;
                             window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
                             
-                            // توجيه سحري لتليجرام بعد ظهور التثبيت بثانية ونصف
                             setTimeout(() => {
                                 window.location.href = "https://t.me/ashtemobile";
                             }, 1500);
