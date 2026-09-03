@@ -16,7 +16,6 @@
         
         body { font-family: 'Cairo', sans-serif; background-color: var(--black); color: #ffffff; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100dvh; margin: 0; overflow: hidden; -webkit-tap-highlight-color: transparent; }
         
-        /* سماء النجوم */
         #stars-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; pointer-events: none; opacity: 0.6; }
         .star { 
             position: absolute; 
@@ -27,13 +26,11 @@
         @keyframes twinkle { 0% { opacity: 0.1; transform: scale(0.8); } 100% { opacity: 0.8; transform: scale(1); } }
         @keyframes drift { from { transform: translateY(100vh); } to { transform: translateY(-10vh); } }
 
-        /* الكرات السائلة */
         .liquid-blob { position: absolute; filter: blur(80px); z-index: 1; opacity: 0.2; animation: liquid-morph 15s infinite ease-in-out alternate; }
         .blob-1 { width: 80vw; height: 80vw; max-width: 400px; max-height: 400px; background: var(--gold-dark); top: -10%; right: -20%; }
         .blob-2 { width: 70vw; height: 70vw; max-width: 350px; max-height: 350px; background: var(--gold); bottom: -10%; left: -20%; animation-delay: -5s; animation-direction: alternate-reverse; }
         @keyframes liquid-morph { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(20px, -20px) scale(0.9); } }
 
-        /* حاوية الهاتف */
         .glass-mobile-card { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; 
             background: rgba(15, 15, 15, 0.6); backdrop-filter: blur(25px); 
@@ -44,7 +41,6 @@
         }
         .glass-mobile-card::-webkit-scrollbar { display: none; }
         
-        /* مفتاح التبديل */
         .toggle-switch { position: relative; display: inline-block; width: 46px; height: 24px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.05); transition: .4s; border-radius: 34px; border: 1px solid rgba(212, 175, 55, 0.2); }
@@ -52,7 +48,6 @@
         input:checked + .slider { background-color: rgba(212, 175, 55, 0.15); }
         input:checked + .slider:before { transform: translateX(22px); background-color: var(--gold-light); }
 
-        /* تنسيقات قسم VIP */
         .premium-section { transition: all 0.4s ease; }
         .custom-select { position: relative; }
         .select-selected { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 18px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: 0.3s; }
@@ -73,7 +68,6 @@
         .progress-wrapper { width: 100%; background: rgba(255, 255, 255, 0.05); border-radius: 8px; height: 6px; overflow: hidden; display: none; margin-top: 10px; }
         .progress-fill { width: 0%; height: 100%; background: var(--gold); transition: width 0.2s ease-out; }
 
-        /* تنسيقات قسم الشهادة المجانية */
         .free-section { display: none; opacity: 0; transition: all 0.4s ease; display: flex; flex-direction: column; gap: 10px; }
         .free-app-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 12px 16px; transition: 0.3s; }
         .free-app-item:hover { background: rgba(255,255,255,0.06); border-color: rgba(212,175,55,0.2); }
@@ -87,15 +81,10 @@
         .app-mini-fill { height: 100%; width: 0%; background: var(--gold); transition: width 0.2s ease; }
         
         .success-badge { display: none; color: #4ade80; font-size: 0.75rem; font-weight: 800; align-items: center; gap: 4px; background: rgba(74, 222, 128, 0.1); padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(74, 222, 128, 0.2); }
-        
-        /* دوگمەی تثبيت ڕاستەوخۆ دوای سەرکەوتن */
-        .manual-install-btn { display: none; background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 800; font-size: 1rem; padding: 14px; border-radius: 18px; width: 100%; margin-top: 10px; border: none; cursor: pointer; text-align: center; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); animation: pulse-glow 2s infinite; }
-        @keyframes pulse-glow { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
-    <!-- سماء النجوم -->
     <div id="stars-container"></div>
 
     <div class="liquid-blob blob-1"></div>
@@ -107,7 +96,6 @@
             <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-bold">Premium Cloud Signer</p>
         </div>
 
-        <!-- مفتاح التبديل الديناميكي -->
         <div class="flex items-center justify-between bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-2xl p-3 transition-colors duration-300" id="modeToggleBox">
             <span class="text-[12px] font-bold text-gray-300 flex items-center gap-2">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -119,7 +107,6 @@
             </label>
         </div>
 
-        <!-- 1. قسم الشهادة المخصصة -->
         <form id="signForm" class="premium-section space-y-4">
             <div class="custom-select" id="customSelect">
                 <div class="select-selected" id="selectedApp">
@@ -160,24 +147,17 @@
 
             <button type="submit" id="submitBtn" class="btn-liquid">بدء التوقيع</button>
             
-            <!-- دوگمەی تثبيت ڕاستەوخۆ بۆ VIP -->
-            <button type="button" id="vipInstallBtn" class="manual-install-btn">📲 تثبيت التطبيق الآن</button>
-
             <div id="progressWrapper" class="progress-wrapper">
                 <div id="progressFill" class="progress-fill"></div>
             </div>
             <div id="status" class="text-center text-[10px] font-bold hidden text-[var(--gold)] mt-2"></div>
         </form>
 
-        <!-- 2. قسم الشهادة المجانية -->
-        <div id="freeAppsSection" class="free-section" style="display: none;">
-            <!-- سيتم توليد التطبيقات هنا عبر الجافاسكربت -->
-        </div>
+        <div id="freeAppsSection" class="free-section" style="display: none;"></div>
 
     </div>
 
     <script>
-        // توليد النجوم
         const starsContainer = document.getElementById('stars-container');
         for (let i = 0; i < 40; i++) {
             let star = document.createElement('div');
@@ -191,7 +171,6 @@
             starsContainer.appendChild(star);
         }
 
-        // بيانات التطبيقات بنصوص نظيفة
         const appsData = [
             { id: 'ESign', name: 'ESign', icon: 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1419.jpeg' },
             { id: 'KSign', name: 'KSign', icon: 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1416.jpeg' },
@@ -200,11 +179,10 @@
             { id: 'Feather', name: 'Feather', icon: 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1421.jpeg' }
         ];
 
-        // بناء قائمة التطبيقات
         const freeAppsSection = document.getElementById('freeAppsSection');
         appsData.forEach(app => {
             freeAppsSection.innerHTML += `
-                <div class="free-app-item" id="item-${app.id}">
+                <div class="free-app-item">
                     <div class="flex items-center gap-3">
                         <img src="${app.icon}" class="app-icon-img" alt="${app.id}">
                         <span class="text-[13px] font-bold text-gray-200">${app.name}</span>
@@ -215,10 +193,6 @@
                         تثبيت
                     </button>
                     
-                    <button class="manual-install-free-btn hidden" style="background:#10b981; color:#fff; border:none; padding:6px 12px; border-radius:10px; font-weight:700; font-size:0.8rem; cursor:pointer;" onclick="triggerInstall('${app.id}')">
-                        📲 تثبيت الآن
-                    </button>
-
                     <div class="app-progress-container">
                         <span class="app-pct-text">0%</span>
                         <div class="app-mini-bar"><div class="app-mini-fill"></div></div>
@@ -232,10 +206,6 @@
             `;
         });
 
-        // تخزين روابط التحميل المؤقتة لكل تطبيق
-        window.pendingInstalls = {};
-
-        // منطق التبديل وتغيير النص ديناميكياً
         const freeCertToggle = document.getElementById('freeCertToggle');
         const premiumSection = document.querySelector('.premium-section');
         const modeToggleBox = document.getElementById('modeToggleBox');
@@ -280,27 +250,13 @@
             }
         }
 
-        // دالة تشغيل التثبيت اليدوي للشهادة المجانية عند ضغط المستخدم
-        function triggerInstall(appName) {
-            const manifestUrl = window.pendingInstalls[appName];
-            if (manifestUrl) {
-                window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestUrl)}`;
-                
-                // الانتقال لتليجرام بعد 6 ثوانٍ للتأكد من بدء التثبيت
-                setTimeout(() => {
-                    window.location.href = "https://t.me/ashtemobile";
-                }, 6000);
-            }
-        }
-
-        // --- توقيع الشهادة المجانية (مع ظهور دوگمەی تثبيت يدوية) ---
+        // --- توقيع الشهادة المجانية (بدون تليجرام لضمان التثبيت الفوري) ---
         async function installFreeApp(appName, btnElement) {
             const itemContainer = btnElement.parentElement;
             const progressContainer = itemContainer.querySelector('.app-progress-container');
             const pctText = itemContainer.querySelector('.app-pct-text');
             const fillBar = itemContainer.querySelector('.app-mini-fill');
             const successBadge = itemContainer.querySelector('.success-badge');
-            const manualBtn = itemContainer.querySelector('.manual-install-free-btn');
 
             btnElement.style.display = 'none';
             progressContainer.style.display = 'flex';
@@ -339,11 +295,9 @@
                             progressContainer.style.display = 'none';
                             successBadge.style.display = 'flex';
                             
-                            // حفظ رابط المانفست وإظهار دوگمەی تثبيت اليدوية للمستخدم
+                            // إطلاق رسالة التثبيت مباشرة ودون أي توجيه مزعج
                             const manifestApiUrl = `https://${window.location.host}/api/manifest?ipa=${encodeURIComponent(serverStatus.ipaUrl)}&bundle_url=${encodeURIComponent(serverStatus.bundleUrl)}&app=${encodeURIComponent(appName)}`;
-                            window.pendingInstalls[appName] = manifestApiUrl;
-                            
-                            manualBtn.style.display = 'inline-block';
+                            window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
                         }, 500);
                     }
                 }, 1200);
@@ -362,21 +316,10 @@
             }
         }
 
-        // --- قسم الـ VIP (مع ظهور دوگمەی تثبيت يدوية) ---
+        // --- قسم الـ VIP (بدون تليجرام لضمان التثبيت الفوري) ---
         const selectedApp = document.getElementById('selectedApp');
         const appOptions = document.getElementById('appOptions');
         const appInput = document.getElementById('appInput');
-        const vipInstallBtn = document.getElementById('vipInstallBtn');
-        let vipManifestUrl = '';
-
-        vipInstallBtn.onclick = () => {
-            if (vipManifestUrl) {
-                window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(vipManifestUrl)}`;
-                setTimeout(() => {
-                    window.location.href = "https://t.me/ashtemobile";
-                }, 6000);
-            }
-        };
 
         selectedApp.onclick = e => { e.stopPropagation(); appOptions.style.display = appOptions.style.display === 'block' ? 'none' : 'block'; };
         document.querySelectorAll('.select-items div').forEach(opt => {
@@ -431,11 +374,13 @@
                     if (serverStatus.status === 'done') {
                         clearInterval(checker); clearInterval(animationInterval);
                         progressFill.style.width = '100%';
-                        status.innerText = '✅ تم التوقيع بنجاح!';
+                        status.innerText = '✅ تم التوقيع بنجاح! جاري التثبيت...';
                         
-                        // تجهيز رابط التثبيت وإظهار دوگمەی تثبيت اليدوية
-                        vipManifestUrl = `https://${window.location.host}/api/manifest?ipa=${encodeURIComponent(serverStatus.ipaUrl)}&bundle_url=${encodeURIComponent(serverStatus.bundleUrl)}&app=${encodeURIComponent(appInput.value)}`;
-                        vipInstallBtn.style.display = 'block';
+                        setTimeout(() => {
+                            // إطلاق رسالة التثبيت المباشرة
+                            const manifestApiUrl = `https://${window.location.host}/api/manifest?ipa=${encodeURIComponent(serverStatus.ipaUrl)}&bundle_url=${encodeURIComponent(serverStatus.bundleUrl)}&app=${encodeURIComponent(appInput.value)}`;
+                            window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
+                        }, 800); 
                     }
                 }, 1200); 
 
