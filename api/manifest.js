@@ -1,6 +1,14 @@
-Export default async function handler(req, res) {
-    const { ipa, app } = req.query;
-    if (!ipa || !app) return res.status(400).send('Invalid Request');
+export default async function handler(req, res) {
+    const { app } = req.query;
+    if (!app) return res.status(400).send('Invalid Request');
+
+    const GITHUB_REPO = process.env.GITHUB_REPO;
+    
+    // وەرگرتنی دوایین ڕیلیس لە گیتهەب کە فایلی واژۆکراوی تێدایە
+    let ipaUrl = `https://github.com/${GITHUB_REPO}/releases/latest/download/${app}_signed.ipa`;
+    if (app.toLowerCase() === 'esign') {
+        ipaUrl = `https://github.com/${GITHUB_REPO}/releases/latest/download/ESign_signed.ipa`;
+    }
 
     const customIcons = {
         'esign': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1419.jpeg',
@@ -12,7 +20,6 @@ Export default async function handler(req, res) {
 
     const iconUrl = customIcons[app.toLowerCase()] || customIcons['esign'];
     
-    // استخدام معرف ثابت ومضمون لكل تطبيق لتجنب أخطاء قراءة الملف
     const bundleIds = {
         'esign': 'p3.puredarks.esign',
         'ksign': 'com.ksign.app',
@@ -36,7 +43,7 @@ Export default async function handler(req, res) {
                     <key>kind</key>
                     <string>software-package</string>
                     <key>url</key>
-                    <string>${ipa}</string>
+                    <string>${ipaUrl}</string>
                 </dict>
                 <dict>
                     <key>kind</key>
