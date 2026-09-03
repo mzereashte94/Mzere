@@ -91,7 +91,6 @@
 </head>
 <body>
 
-    <!-- سماء النجوم -->
     <div id="stars-container"></div>
 
     <div class="liquid-blob blob-1"></div>
@@ -103,7 +102,6 @@
             <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-bold">Premium Cloud Signer</p>
         </div>
 
-        <!-- مفتاح التبديل الديناميكي -->
         <div class="flex items-center justify-between bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-2xl p-3 transition-colors duration-300" id="modeToggleBox">
             <span class="text-[12px] font-bold text-gray-300 flex items-center gap-2">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -115,7 +113,6 @@
             </label>
         </div>
 
-        <!-- 1. قسم الشهادة المخصصة -->
         <form id="signForm" class="premium-section space-y-4">
             <div class="custom-select" id="customSelect">
                 <div class="select-selected" id="selectedApp">
@@ -161,15 +158,11 @@
             <div id="status" class="text-center text-[10px] font-bold hidden text-[var(--gold)] mt-2"></div>
         </form>
 
-        <!-- 2. قسم الشهادة المجانية -->
-        <div id="freeAppsSection" class="free-section" style="display: none;">
-            <!-- سيتم توليد التطبيقات هنا عبر الجافاسكربت -->
-        </div>
+        <div id="freeAppsSection" class="free-section" style="display: none;"></div>
 
     </div>
 
     <script>
-        // توليد النجوم
         const starsContainer = document.getElementById('stars-container');
         for (let i = 0; i < 40; i++) {
             let star = document.createElement('div');
@@ -183,7 +176,6 @@
             starsContainer.appendChild(star);
         }
 
-        // بيانات التطبيقات بروابط صحيحة مطابقة لمجلد icons الخاص بك
         const appsData = [
             { id: 'AshteMobile', name: 'AshteMobile', icon: 'https://raw.githubusercontent.com/mzereashte94/Mzere/main/icons/Ashtemobile.jpeg' },
             { id: 'Esign', name: 'Esign', icon: 'https://raw.githubusercontent.com/mzereashte94/Mzere/main/icons/Esign.jpeg' },
@@ -191,7 +183,6 @@
             { id: 'MyTV', name: 'MyTV', icon: 'https://raw.githubusercontent.com/mzereashte94/Mzere/main/icons/mytv.jpeg' }
         ];
 
-        // بناء قائمة التطبيقات
         const freeAppsSection = document.getElementById('freeAppsSection');
         appsData.forEach(app => {
             freeAppsSection.innerHTML += `
@@ -219,7 +210,6 @@
             `;
         });
 
-        // منطق التبديل وتغيير النص ديناميكياً
         const freeCertToggle = document.getElementById('freeCertToggle');
         const premiumSection = document.querySelector('.premium-section');
         const modeToggleBox = document.getElementById('modeToggleBox');
@@ -247,7 +237,6 @@
             }
         });
 
-        // دوال مساعدة
         const truncate = (str, n) => str.length > n ? str.substr(0, n - 1) + '...' : str;
         document.getElementById('p12File').onchange = e => { if(e.target.files[0]) document.getElementById('p12Name').innerText = truncate(e.target.files[0].name, 25); };
         document.getElementById('provFile').onchange = e => { if(e.target.files[0]) document.getElementById('provName').innerText = truncate(e.target.files[0].name, 25); };
@@ -310,7 +299,8 @@
                             progressContainer.style.display = 'none';
                             successBadge.style.display = 'flex';
                             
-                            const manifestApiUrl = `https://${window.location.host}/api/manifest?app=${encodeURIComponent(appName)}`;
+                            // 🔥 دۆمەینی جێگیر بۆ ئەوەی نامەی تثبيت بێت
+                            const manifestApiUrl = `https://mzere.vercel.app/api/manifest?app=${encodeURIComponent(appName)}`;
                             window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
                             
                             setTimeout(() => {
@@ -335,7 +325,6 @@
             }
         }
 
-        // --- قسم الـ VIP ---
         const selectedApp = document.getElementById('selectedApp');
         const appOptions = document.getElementById('appOptions');
         const appInput = document.getElementById('appInput');
@@ -396,7 +385,8 @@
                         status.innerText = '✅ تم التوقيع بنجاح! جاري التثبيت...';
                         
                         setTimeout(() => {
-                            const manifestApiUrl = `https://${window.location.host}/api/manifest?app=${encodeURIComponent(appInput.value)}`;
+                            // 🔥 دۆمەینی جێگیر بۆ ئەوەی نامەی تثبيت بێت
+                            const manifestApiUrl = `https://mzere.vercel.app/api/manifest?app=${encodeURIComponent(appInput.value)}`;
                             window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
                             
                             setTimeout(() => {
