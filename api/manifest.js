@@ -4,10 +4,10 @@ export default async function handler(req, res) {
 
     const GITHUB_REPO = process.env.GITHUB_REPO;
     
-    // وەرگرتنی دوایین ڕیلیس لە گیتهەب کە فایلی واژۆکراوی تێدایە
-    let ipaUrl = `https://github.com/${GITHUB_REPO}/releases/latest/download/${app}_signed.ipa`;
+    // وەرگرتنی فایلی واژۆکراو ڕاستەوخۆ لە ڕیلیسی V1
+    let ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/${app}_signed.ipa`;
     if (app.toLowerCase() === 'esign') {
-        ipaUrl = `https://github.com/${GITHUB_REPO}/releases/latest/download/ESign_signed.ipa`;
+        ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/ESign_signed.ipa`;
     }
 
     const customIcons = {
