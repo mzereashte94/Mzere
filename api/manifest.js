@@ -1,5 +1,5 @@
-export default async function handler(req, res) {
-    const { ipa, bundle_url, app } = req.query;
+Export default async function handler(req, res) {
+    const { ipa, app } = req.query;
     if (!ipa || !app) return res.status(400).send('Invalid Request');
 
     const customIcons = {
@@ -11,18 +11,17 @@ export default async function handler(req, res) {
     };
 
     const iconUrl = customIcons[app.toLowerCase()] || customIcons['esign'];
-    let actualBundleId = `com.ipablack.${app.toLowerCase()}`;
-
-    try {
-        if (bundle_url) {
-            const bundleRes = await fetch(bundle_url);
-            if (bundleRes.ok) {
-                actualBundleId = (await bundleRes.text()).trim();
-            }
-        }
-    } catch (e) {
-        console.error("Failed to fetch bundle ID");
-    }
+    
+    // استخدام معرف ثابت ومضمون لكل تطبيق لتجنب أخطاء قراءة الملف
+    const bundleIds = {
+        'esign': 'p3.puredarks.esign',
+        'ksign': 'com.ksign.app',
+        'scarlet': 'com.fastsign.scarlet',
+        'gbox': 'com.gbox.app',
+        'feather': 'com.feather.app'
+    };
+    
+    const actualBundleId = bundleIds[app.toLowerCase()] || `com.ipablack.${app.toLowerCase()}`;
 
     const manifestXML = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
