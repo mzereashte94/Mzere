@@ -5,12 +5,11 @@ export default async function handler(req, res) {
     const GITHUB_REPO = "mzereashte94/Mzere";
     
     let ipaName = `${app}_signed.ipa`;
-    if (app.toLowerCase() === 'esign') ipaName = 'ESign_signed.ipa';
 
     const ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/${ipaName}`;
 
-    // 🔥 چارەسەرە گەورەکە: هێنانەی ناوی ڕاستەقینەی ئەپەکە (Bundle ID) لە گایتهەبەوە
-    let actualBundleId = `com.ipablack.${app.toLowerCase()}`;
+    // هێنانەی ناوی ڕاستەقینەی ئەپەکە (Bundle ID) لە گایتهەبەوە
+    let actualBundleId = `com.ashtemobile.${app.toLowerCase()}`;
     try {
         const bundleRes = await fetch(`https://github.com/${GITHUB_REPO}/releases/download/V1/bundle_id.txt?v=${Date.now()}`);
         if (bundleRes.ok) {
@@ -23,14 +22,15 @@ export default async function handler(req, res) {
         console.log("Fallback to default bundle id");
     }
 
+    // ناوی وێنە نوێیەکانی ئەپەکانت بەپێی خواستی خۆت
     const customIcons = {
-        'esign': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1419.jpeg',
-        'ksign': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1416.jpeg',
-        'scarlet': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1420.jpeg',
-        'gbox': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1417.jpeg',
-        'feather': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1421.jpeg'
+        'ashtemobile': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/Ashtemobile.jpeg',
+        'esign': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/Esign.jpeg',
+        'ksign': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/Ksign.jpeg',
+        'mytv': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/mytv.jpeg'
     };
-    const iconUrl = customIcons[app.toLowerCase()] || customIcons['esign'];
+    
+    const iconUrl = customIcons[app.toLowerCase()] || customIcons['ashtemobile'];
 
     const manifestXML = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
