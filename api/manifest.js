@@ -4,10 +4,23 @@ export default async function handler(req, res) {
 
     const GITHUB_REPO = "mzereashte94/Mzere";
     
-    // لینکی خاوێن بێ هیچ زیادەیەک بۆ ئەوەی ئایفۆن و گایتهەب کێشەیان نەبێت
-    let ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/${app}_signed.ipa`;
-    if (app.toLowerCase() === 'esign') {
-        ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/ESign_signed.ipa`;
+    let ipaName = `${app}_signed.ipa`;
+    if (app.toLowerCase() === 'esign') ipaName = 'ESign_signed.ipa';
+
+    const ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/${ipaName}`;
+
+    // 🔥 چارەسەرە گەورەکە: هێنانەی ناوی ڕاستەقینەی ئەپەکە (Bundle ID) لە گایتهەبەوە
+    let actualBundleId = `com.ipablack.${app.toLowerCase()}`;
+    try {
+        const bundleRes = await fetch(`https://github.com/${GITHUB_REPO}/releases/download/V1/bundle_id.txt?v=${Date.now()}`);
+        if (bundleRes.ok) {
+            const text = await bundleRes.text();
+            if (text && text.trim().length > 3) {
+                actualBundleId = text.trim();
+            }
+        }
+    } catch (err) {
+        console.log("Fallback to default bundle id");
     }
 
     const customIcons = {
@@ -17,18 +30,7 @@ export default async function handler(req, res) {
         'gbox': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1417.jpeg',
         'feather': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/IMG_1421.jpeg'
     };
-
     const iconUrl = customIcons[app.toLowerCase()] || customIcons['esign'];
-    
-    const bundleIds = {
-        'esign': 'p3.puredarks.esign',
-        'ksign': 'com.ksign.app',
-        'scarlet': 'com.fastsign.scarlet',
-        'gbox': 'com.gbox.app',
-        'feather': 'com.feather.app'
-    };
-    
-    const actualBundleId = bundleIds[app.toLowerCase()] || `com.ipablack.${app.toLowerCase()}`;
 
     const manifestXML = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -71,9 +73,6 @@ export default async function handler(req, res) {
 </plist>`;
 
     res.setHeader('Content-Type', 'text/xml; charset=utf-8');
-    // ڕێگریکردن لە کاش تەنها بۆ خودی فایلی مانفێستەکە
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
     res.status(200).send(manifestXML);
 }
