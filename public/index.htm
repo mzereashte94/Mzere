@@ -7,92 +7,53 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { 
-            --gold: #d4af37; 
-            --gold-light: #fceabb; 
-            --gold-dark: #8c6b14; 
-            --black: #050505; 
-        }
-        
+        :root { --gold: #d4af37; --gold-light: #fceabb; --gold-dark: #8c6b14; --black: #050505; }
         body { font-family: 'Cairo', sans-serif; background-color: var(--black); color: #ffffff; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100dvh; margin: 0; overflow: hidden; -webkit-tap-highlight-color: transparent; }
-        
-        /* سماء النجوم */
         #stars-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; pointer-events: none; opacity: 0.6; }
-        .star { 
-            position: absolute; 
-            background: var(--gold-light); 
-            border-radius: 50%; 
-            animation: twinkle var(--twinkle-duration) infinite alternate ease-in-out, drift var(--drift-duration) infinite linear;
-        }
+        .star { position: absolute; background: var(--gold-light); border-radius: 50%; animation: twinkle var(--twinkle-duration) infinite alternate ease-in-out, drift var(--drift-duration) infinite linear; }
         @keyframes twinkle { 0% { opacity: 0.1; transform: scale(0.8); } 100% { opacity: 0.8; transform: scale(1); } }
         @keyframes drift { from { transform: translateY(100vh); } to { transform: translateY(-10vh); } }
-
-        /* الكرات السائلة */
         .liquid-blob { position: absolute; filter: blur(80px); z-index: 1; opacity: 0.2; animation: liquid-morph 15s infinite ease-in-out alternate; }
         .blob-1 { width: 80vw; height: 80vw; max-width: 400px; max-height: 400px; background: var(--gold-dark); top: -10%; right: -20%; }
         .blob-2 { width: 70vw; height: 70vw; max-width: 350px; max-height: 350px; background: var(--gold); bottom: -10%; left: -20%; animation-delay: -5s; animation-direction: alternate-reverse; }
         @keyframes liquid-morph { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(20px, -20px) scale(0.9); } }
-
-        /* حاوية الهاتف */
-        .glass-mobile-card { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; 
-            background: rgba(15, 15, 15, 0.6); backdrop-filter: blur(25px); 
-            border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 35px; 
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); 
-            padding: 2rem 1.5rem; width: 92%; max-width: 400px; 
-            display: flex; flex-direction: column; gap: 1.2rem; max-height: 95vh; overflow-y: auto; scrollbar-width: none; 
-        }
+        .glass-mobile-card { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; background: rgba(15, 15, 15, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 35px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); padding: 2rem 1.5rem; width: 92%; max-width: 400px; display: flex; flex-direction: column; gap: 1.2rem; max-height: 95vh; overflow-y: auto; scrollbar-width: none; }
         .glass-mobile-card::-webkit-scrollbar { display: none; }
-        
-        /* مفتاح التبديل */
         .toggle-switch { position: relative; display: inline-block; width: 46px; height: 24px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.05); transition: .4s; border-radius: 34px; border: 1px solid rgba(212, 175, 55, 0.2); }
         .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: var(--gold); transition: .4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 50%; }
         input:checked + .slider { background-color: rgba(212, 175, 55, 0.15); }
         input:checked + .slider:before { transform: translateX(22px); background-color: var(--gold-light); }
-
-        /* تنسيقات قسم VIP */
         .premium-section { transition: all 0.4s ease; }
         .custom-select { position: relative; }
         .select-selected { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 18px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: 0.3s; }
         .select-items { position: absolute; background: rgba(15, 15, 15, 0.98); backdrop-filter: blur(20px); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 18px; top: calc(100% + 8px); left: 0; right: 0; z-index: 99; display: none; max-height: 200px; overflow-y: auto; }
         .select-items div { padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 0.9rem; cursor: pointer; }
         .select-items img, .select-selected img, .app-icon-img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
-
         .upload-row { display: flex; justify-content: space-between; align-items: center; background: rgba(212, 175, 55, 0.03); border: 1px dashed rgba(212, 175, 55, 0.3); border-radius: 18px; padding: 12px 16px; transition: 0.3s; cursor: pointer; }
         .upload-row:active { background: rgba(212, 175, 55, 0.08); }
         .upload-text { display: flex; flex-direction: column; text-align: right; }
-
         .gold-input { width: 70%; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 14px; padding: 10px; color: white; text-align: center; font-size: 0.9rem; letter-spacing: 1px; outline: none; margin: 0 auto; display: block; transition: 0.3s;}
         .gold-input:focus { border-color: var(--gold); background: rgba(0,0,0,0.6); }
-
         .btn-liquid { background: linear-gradient(135deg, var(--gold-dark), var(--gold)); color: #000; font-weight: 800; font-size: 1rem; padding: 14px; border-radius: 18px; width: 100%; margin-top: 5px; border: none; cursor: pointer; transition: 0.3s transform; }
         .btn-liquid:active { transform: scale(0.97); }
-
         .progress-wrapper { width: 100%; background: rgba(255, 255, 255, 0.05); border-radius: 8px; height: 6px; overflow: hidden; display: none; margin-top: 10px; }
         .progress-fill { width: 0%; height: 100%; background: var(--gold); transition: width 0.2s ease-out; }
-
-        /* تنسيقات قسم الشهادة المجانية */
         .free-section { display: none; opacity: 0; transition: all 0.4s ease; display: flex; flex-direction: column; gap: 10px; }
         .free-app-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 12px 16px; transition: 0.3s; }
         .free-app-item:hover { background: rgba(255,255,255,0.06); border-color: rgba(212,175,55,0.2); }
-        
         .install-action-btn { background: rgba(212, 175, 55, 0.1); color: var(--gold); border: 1px solid rgba(212, 175, 55, 0.3); padding: 6px 16px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.3s; }
         .install-action-btn:active { transform: scale(0.92); background: var(--gold); color: #000; }
-        
         .app-progress-container { display: none; flex-direction: column; align-items: center; width: 70px; }
         .app-pct-text { font-size: 0.85rem; font-weight: 800; color: var(--gold-light); margin-bottom: 4px; font-variant-numeric: tabular-nums; }
         .app-mini-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
         .app-mini-fill { height: 100%; width: 0%; background: var(--gold); transition: width 0.2s ease; }
-        
         .success-badge { display: none; color: #4ade80; font-size: 0.75rem; font-weight: 800; align-items: center; gap: 4px; background: rgba(74, 222, 128, 0.1); padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(74, 222, 128, 0.2); }
     </style>
 </head>
 <body>
-
     <div id="stars-container"></div>
-
     <div class="liquid-blob blob-1"></div>
     <div class="liquid-blob blob-2"></div>
 
@@ -127,7 +88,6 @@
                 </div>
                 <input type="hidden" id="appInput" value="AshteMobile" required>
             </div>
-
             <div class="space-y-2">
                 <div class="upload-row" onclick="document.getElementById('p12File').click()">
                     <div class="upload-text">
@@ -137,7 +97,6 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-light)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     <input type="file" id="p12File" class="hidden" accept=".p12">
                 </div>
-
                 <div class="upload-row" onclick="document.getElementById('provFile').click()">
                     <div class="upload-text">
                         <span class="text-[12px] font-bold text-gray-200">ملف Provision</span>
@@ -147,19 +106,31 @@
                     <input type="file" id="provFile" class="hidden" accept=".mobileprovision">
                 </div>
             </div>
-
             <input type="password" id="password" placeholder="كلمة المرور" class="gold-input">
-
             <button type="submit" id="submitBtn" class="btn-liquid">بدء التوقيع</button>
-            
-            <div id="progressWrapper" class="progress-wrapper">
-                <div id="progressFill" class="progress-fill"></div>
-            </div>
+            <div id="progressWrapper" class="progress-wrapper"><div id="progressFill" class="progress-fill"></div></div>
             <div id="status" class="text-center text-[10px] font-bold hidden text-[var(--gold)] mt-2"></div>
         </form>
 
-        <div id="freeAppsSection" class="free-section" style="display: none;"></div>
+        <div id="freeAppsSection" class="free-section" style="display: none;">
+            <!-- بەشی نوێ: هەڵبژاردنی بڕوانامە و داونلۆدی DNS -->
+            <div class="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-2xl p-4 mb-2">
+                <label class="text-[12px] font-bold text-gray-300 block mb-2 text-right">اختر الشهادة (بڕوانامە هەڵبژێرە):</label>
+                <select id="freeCertSelect" class="w-full bg-[rgba(0,0,0,0.6)] border border-[rgba(212,175,55,0.3)] rounded-xl p-3 text-[13px] text-white outline-none mb-3 font-bold" style="text-align-last: center;">
+                    <!-- کاتێک فۆڵدەری نوێ دروست دەکەیت لە گایتهەب، تەنها دێڕێک لێرە زیاد بکە -->
+                    <option value="china">China Telecom (Active)</option>
+                    <option value="hsbc">HSBC Bank Plc (Active)</option>
+                </select>
 
+                <!-- لێرەدا لینکی DNS ەکەت دابنێ لە جێگەی # -->
+                <a href="#" class="w-full flex items-center justify-center gap-2 rounded-xl p-3 mt-1" style="background: linear-gradient(135deg, #2d3748, #1a202c); border: 1px solid rgba(255,255,255,0.1); color: var(--gold-light); font-size: 0.85rem; font-weight: bold; text-decoration: none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    تحميل ملف DNS (منع الإعلانات)
+                </a>
+            </div>
+            
+            <div id="appsListContainer" class="flex flex-col gap-2"></div>
+        </div>
     </div>
 
     <script>
@@ -183,25 +154,22 @@
             { id: 'MyTV', name: 'MyTV', icon: 'https://raw.githubusercontent.com/mzereashte94/Mzere/main/icons/mytv.jpeg' }
         ];
 
-        const freeAppsSection = document.getElementById('freeAppsSection');
+        const appsListContainer = document.getElementById('appsListContainer');
         appsData.forEach(app => {
-            freeAppsSection.innerHTML += `
+            appsListContainer.innerHTML += `
                 <div class="free-app-item">
                     <div class="flex items-center gap-3">
                         <img src="${app.icon}" class="app-icon-img" alt="${app.id}">
                         <span class="text-[13px] font-bold text-gray-200">${app.name}</span>
                     </div>
-                    
                     <button class="install-action-btn" onclick="installFreeApp('${app.id}', this)">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                         تثبيت
                     </button>
-                    
                     <div class="app-progress-container">
                         <span class="app-pct-text">0%</span>
                         <div class="app-mini-bar"><div class="app-mini-fill"></div></div>
                     </div>
-
                     <div class="success-badge">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         جاهز
@@ -214,6 +182,7 @@
         const premiumSection = document.querySelector('.premium-section');
         const modeToggleBox = document.getElementById('modeToggleBox');
         const toggleTextLabel = document.getElementById('toggleTextLabel');
+        const freeAppsSection = document.getElementById('freeAppsSection');
 
         freeCertToggle.addEventListener('change', function() {
             if (this.checked) {
@@ -249,13 +218,13 @@
             try {
                 const res = await fetch(`/api/status?build_id=${buildId}&app=${appName}`);
                 return await res.json();
-            } catch (e) {
-                return { status: 'processing' };
-            }
+            } catch (e) { return { status: 'processing' }; }
         }
 
-        // --- توقيع الشهادة المجانية ---
         async function installFreeApp(appName, btnElement) {
+            // وەرگرتنی ئەو شهادەیەی کە بەکارهێنەر هەڵیبژاردووە
+            const selectedCertId = document.getElementById('freeCertSelect').value;
+            
             const itemContainer = btnElement.parentElement;
             const progressContainer = itemContainer.querySelector('.app-progress-container');
             const pctText = itemContainer.querySelector('.app-pct-text');
@@ -270,8 +239,7 @@
                 if (pct < 95) {
                     pct += Math.floor(Math.random() * 6) + 2; 
                     if (pct > 95) pct = 95;
-                    pctText.innerText = pct + '%';
-                    fillBar.style.width = pct + '%';
+                    pctText.innerText = pct + '%'; fillBar.style.width = pct + '%';
                 }
             }, 200);
 
@@ -279,7 +247,8 @@
                 const res = await fetch('/api/sign', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ app: appName, use_free_cert: true })
+                    // ناردنی ئایدی شهادەکە بۆ سێرڤەر
+                    body: JSON.stringify({ app: appName, use_free_cert: true, cert_id: selectedCertId })
                 });
                 
                 if(!res.ok) throw new Error('Error');
@@ -289,38 +258,26 @@
                 const checker = setInterval(async () => {
                     const serverStatus = await checkStatus(buildId, appName);
                     if (serverStatus.status === 'done') {
-                        clearInterval(checker);
-                        clearInterval(simInterval);
-                        
-                        pctText.innerText = '100%';
-                        fillBar.style.width = '100%';
-                        
+                        clearInterval(checker); clearInterval(simInterval);
+                        pctText.innerText = '100%'; fillBar.style.width = '100%';
                         setTimeout(() => {
                             progressContainer.style.display = 'none';
                             successBadge.style.display = 'flex';
                             
-                            // 🔥 دۆمەینی جێگیر بۆ ئەوەی نامەی تثبيت بێت
                             const manifestApiUrl = `https://mzere.vercel.app/api/manifest?app=${encodeURIComponent(appName)}`;
                             window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
                             
-                            setTimeout(() => {
-                                window.location.href = "https://t.me/ashtemobile";
-                            }, 1500);
-
+                            setTimeout(() => { window.location.href = "https://t.me/ashtemobile"; }, 1500);
                         }, 500);
                     }
                 }, 1200);
-
             } catch (err) {
                 clearInterval(simInterval);
-                pctText.innerText = 'فشل';
-                pctText.style.color = '#ef4444';
-                fillBar.style.background = '#ef4444';
+                pctText.innerText = 'فشل'; pctText.style.color = '#ef4444'; fillBar.style.background = '#ef4444';
                 setTimeout(() => {
                     progressContainer.style.display = 'none';
                     btnElement.style.display = 'flex';
-                    pctText.style.color = 'var(--gold-light)';
-                    fillBar.style.background = 'var(--gold)';
+                    pctText.style.color = 'var(--gold-light)'; fillBar.style.background = 'var(--gold)';
                 }, 2000);
             }
         }
@@ -345,9 +302,7 @@
             const provFile = document.getElementById('provFile');
             const passwordInput = document.getElementById('password');
 
-            if (!p12File.files[0] || !provFile.files[0] || !passwordInput.value) {
-                return alert('يرجى إرفاق ملفات الشهادة وكلمة المرور!');
-            }
+            if (!p12File.files[0] || !provFile.files[0] || !passwordInput.value) return alert('يرجى إرفاق ملفات الشهادة وكلمة المرور!');
 
             btn.disabled = true; btn.innerText = 'جاري المعالجة...';
             status.classList.remove('hidden'); status.innerText = 'يتم الاتصال بالمحرك...';
@@ -366,9 +321,7 @@
                 const data = await res.json();
                 const buildId = data.build_id;
 
-                progressWrapper.style.display = 'block';
-                btn.style.display = 'none';
-                status.innerText = 'يتم التوقيع الآن...';
+                progressWrapper.style.display = 'block'; btn.style.display = 'none'; status.innerText = 'يتم التوقيع الآن...';
                 
                 let simulatedProgress = 0;
                 const animationInterval = setInterval(() => {
@@ -381,25 +334,16 @@
                     const serverStatus = await checkStatus(buildId, appInput.value);
                     if (serverStatus.status === 'done') {
                         clearInterval(checker); clearInterval(animationInterval);
-                        progressFill.style.width = '100%';
-                        status.innerText = '✅ تم التوقيع بنجاح! جاري التثبيت...';
-                        
+                        progressFill.style.width = '100%'; status.innerText = '✅ تم التوقيع بنجاح! جاري التثبيت...';
                         setTimeout(() => {
-                            // 🔥 دۆمەینی جێگیر بۆ ئەوەی نامەی تثبيت بێت
                             const manifestApiUrl = `https://mzere.vercel.app/api/manifest?app=${encodeURIComponent(appInput.value)}`;
                             window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
-                            
-                            setTimeout(() => {
-                                window.location.href = "https://t.me/ashtemobile";
-                            }, 1500);
-
+                            setTimeout(() => { window.location.href = "https://t.me/ashtemobile"; }, 1500);
                         }, 800); 
                     }
                 }, 1200); 
-
             } catch (err) {
-                status.innerText = '❌ فشل التوقيع، حاول مجدداً.';
-                progressWrapper.style.display = 'none';
+                status.innerText = '❌ فشل التوقيع، حاول مجدداً.'; progressWrapper.style.display = 'none';
                 btn.style.display = 'block'; btn.disabled = false; btn.innerText = 'بدء التوقيع';
             }
         };
