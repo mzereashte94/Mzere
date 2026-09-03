@@ -21,6 +21,7 @@ jobs:
         env:
           APP_NAME: ${{ github.event.client_payload.app_name }}
           USE_FREE_CERT: ${{ github.event.client_payload.use_free_cert }}
+          CERT_ID: ${{ github.event.client_payload.cert_id }}
           P12_BASE64: ${{ github.event.client_payload.p12_base64 }}
           PROV_BASE64: ${{ github.event.client_payload.prov_base64 }}
           CUSTOM_PASSWORD: ${{ github.event.client_payload.password }}
@@ -45,27 +46,11 @@ jobs:
           
           LOWER_APP=$(echo "$APP_NAME" | tr '[:upper:]' '[:lower:]')
           
-          if [[ "$LOWER_APP" == "ashtemobile" ]]; then
-            IPA_NAME="AshteMobile.ipa"
-            ICON_NAME="Ashtemobile.jpeg"
-            REAL_NAME="AshteMobile"
-          elif [[ "$LOWER_APP" == "esign" ]]; then
-            IPA_NAME="Esign.ipa"
-            ICON_NAME="Esign.jpeg"
-            REAL_NAME="Esign"
-          elif [[ "$LOWER_APP" == "ksign" ]]; then
-            IPA_NAME="Ksign.ipa"
-            ICON_NAME="Ksign.jpeg"
-            REAL_NAME="Ksign"
-          elif [[ "$LOWER_APP" == "mytv" ]]; then
-            IPA_NAME="MyTV.ipa"
-            ICON_NAME="mytv.jpeg"
-            REAL_NAME="MyTV"
-          else
-            IPA_NAME="AshteMobile.ipa"
-            ICON_NAME="Ashtemobile.jpeg"
-            REAL_NAME="AshteMobile"
-          fi
+          if [[ "$LOWER_APP" == "ashtemobile" ]]; then IPA_NAME="AshteMobile.ipa"; ICON_NAME="Ashtemobile.jpeg"; REAL_NAME="AshteMobile";
+          elif [[ "$LOWER_APP" == "esign" ]]; then IPA_NAME="Esign.ipa"; ICON_NAME="Esign.jpeg"; REAL_NAME="Esign";
+          elif [[ "$LOWER_APP" == "ksign" ]]; then IPA_NAME="Ksign.ipa"; ICON_NAME="Ksign.jpeg"; REAL_NAME="Ksign";
+          elif [[ "$LOWER_APP" == "mytv" ]]; then IPA_NAME="MyTV.ipa"; ICON_NAME="mytv.jpeg"; REAL_NAME="MyTV";
+          else IPA_NAME="AshteMobile.ipa"; ICON_NAME="Ashtemobile.jpeg"; REAL_NAME="AshteMobile"; fi
 
           (
             wget -qO- https://github.com/zhlynn/zsign/releases/download/v1.0.4/zsign-linux-x86_64.tar.gz | tar -xz
@@ -80,8 +65,9 @@ jobs:
           (
             cp "$GITHUB_WORKSPACE/icons/$ICON_NAME" downloaded_icon.png
             if [[ "$USE_FREE_CERT" == "true" ]]; then
-              cp "$GITHUB_WORKSPACE/cert/cert.p12" ./cert.p12
-              cp "$GITHUB_WORKSPACE/cert/profile.mobileprovision" ./profile.mobileprovision
+              # هنا التغيير: نستخدم المجلد المختار (CERT_ID)
+              cp "$GITHUB_WORKSPACE/cert/$CERT_ID/cert.p12" ./cert.p12
+              cp "$GITHUB_WORKSPACE/cert/$CERT_ID/profile.mobileprovision" ./profile.mobileprovision
             else
               echo "$P12_BASE64" | tr -d ' \n\r' | base64 -d > cert.p12
               echo "$PROV_BASE64" | tr -d ' \n\r' | base64 -d > profile.mobileprovision
@@ -90,10 +76,9 @@ jobs:
           
           wait
 
-          if [[ "$USE_FREE_CERT" == "true" ]]; then CERT_PASSWORD=$(cat "$GITHUB_WORKSPACE/cert/pass.txt" | tr -d '\n\r');
+          if [[ "$USE_FREE_CERT" == "true" ]]; then CERT_PASSWORD=$(cat "$GITHUB_WORKSPACE/cert/$CERT_ID/pass.txt" | tr -d '\n\r');
           else CERT_PASSWORD=$(echo "$CUSTOM_PASSWORD" | tr -d '\n\r'); fi
 
-          # استخراج وتعديل آمن جداً بدون أخطاء unzip
           APP_DIR=$(python3 -c "
           import zipfile
           with zipfile.ZipFile('raw_app.ipa', 'r') as z:
