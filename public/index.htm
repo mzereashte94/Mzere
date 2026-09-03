@@ -113,23 +113,30 @@
             <div id="status" class="text-center text-[10px] font-bold hidden text-[var(--gold)] mt-2"></div>
         </form>
 
-        <!-- بەشی الشهادة المجانية (لێرەدا ناوی بڕوانامەکان دەگۆڕیت) -->
+        <!-- بەشی الشهادة المجانية (لیستی بڕوانامەکان و DNS) -->
         <div id="freeAppsSection" class="free-section" style="display: none;">
             
             <div class="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-2xl p-4 mb-2">
                 <label class="text-[12px] font-bold text-gray-300 block mb-2 text-right">اختر الشهادة (بڕوانامە هەڵبژێرە):</label>
+                
                 <select id="freeCertSelect" class="w-full bg-[rgba(0,0,0,0.6)] border border-[rgba(212,175,55,0.3)] rounded-xl p-3 text-[13px] text-white outline-none mb-3 font-bold" style="text-align-last: center;">
-                    
-                    <!-- ناوی بڕوانامەی یەکەم (Jiangsu Simcere) -->
-                    <option value="jiangsu">Jiangsu Simcere Pharmaceutical</option>
-                    
-                    <!-- ئەگەر بڕوانامەی ترت هەبوو، لێرە زیادی دەکەیت وەک ئەمە -->
-                    <!-- <option value="hsbc">HSBC Bank Plc</option> -->
-                    
+                    <!-- لیستە نوێیەکەت لێرەدایە -->
+                    <option value="moving2">2 Moving Increasingly</option>
+                    <option value="aramco">Aramco Services Company</option>
+                    <option value="beijing_xibei">Beijing Xibei</option>
+                    <option value="beijing_zhizhangyi">Beijing Zhizhangyi Inc</option>
+                    <option value="bzi_boc">BZI BOC</option>
+                    <option value="china_telecom">China Telecom Corporation Limited</option>
+                    <option value="luoyang">Luoyang Postal Administration</option>
+                    <option value="moving">Moving Increasingly</option>
+                    <option value="powerchin">Powerchin</option>
+                    <option value="qingdao">Qingdao Rural Commercial Bank Co., Ltd</option>
+                    <option value="vietnam">Vietnam Rubber</option>
+                    <option value="xl_axiata">XL AXIATA, PT TBK</option>
                 </select>
 
-                <!-- لینکی DNS، تکایە لە بری ئەستێرەکان (***) لینکی فایلی DNS ەکەت دابنێ -->
-                <a href="***" class="w-full flex items-center justify-center gap-2 rounded-xl p-3 mt-1" style="background: linear-gradient(135deg, #2d3748, #1a202c); border: 1px solid rgba(255,255,255,0.1); color: var(--gold-light); font-size: 0.85rem; font-weight: bold; text-decoration: none;">
+                <!-- لینکی DNS دروستکرا -->
+                <a href="https://ashtemobile.site/ashtemobile.mobileconfig" class="w-full flex items-center justify-center gap-2 rounded-xl p-3 mt-1" style="background: linear-gradient(135deg, #2d3748, #1a202c); border: 1px solid rgba(255,255,255,0.1); color: var(--gold-light); font-size: 0.85rem; font-weight: bold; text-decoration: none;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     تحميل ملف DNS (منع الإعلانات)
                 </a>
@@ -228,7 +235,6 @@
         }
 
         async function installFreeApp(appName, btnElement) {
-            // وەرگرتنی ئەو شهادەیەی کە بەکارهێنەر هەڵیبژاردووە
             const selectedCertId = document.getElementById('freeCertSelect').value;
             
             const itemContainer = btnElement.parentElement;
@@ -253,7 +259,6 @@
                 const res = await fetch('/api/sign', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // ناردنی ئایدی شهادەکە بۆ سێرڤەر
                     body: JSON.stringify({ app: appName, use_free_cert: true, cert_id: selectedCertId })
                 });
                 
