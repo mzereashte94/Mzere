@@ -4,13 +4,10 @@ export default async function handler(req, res) {
 
     const GITHUB_REPO = "mzereashte94/Mzere";
     
-    // دروستکردنی ژمارەیەکی کاتی بۆ ئەوەی ئایفۆنەکە کاش (Cache) نەکات
-    const cacheBuster = Date.now().toString();
-    
-    // دانانی لینکی فایلەکە لەگەڵ فێڵی کاشەکە
-    let ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/${app}_signed.ipa?v=${cacheBuster}`;
+    // لینکی خاوێن بێ هیچ زیادەیەک بۆ ئەوەی ئایفۆن و گایتهەب کێشەیان نەبێت
+    let ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/${app}_signed.ipa`;
     if (app.toLowerCase() === 'esign') {
-        ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/ESign_signed.ipa?v=${cacheBuster}`;
+        ipaUrl = `https://github.com/${GITHUB_REPO}/releases/download/V1/ESign_signed.ipa`;
     }
 
     const customIcons = {
@@ -74,6 +71,7 @@ export default async function handler(req, res) {
 </plist>`;
 
     res.setHeader('Content-Type', 'text/xml; charset=utf-8');
+    // ڕێگریکردن لە کاش تەنها بۆ خودی فایلی مانفێستەکە
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
