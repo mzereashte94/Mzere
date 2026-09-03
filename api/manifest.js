@@ -65,7 +65,7 @@ export default async function handler(req, res) {
                 <key>kind</key>
                 <string>software</string>
                 <key>title</key>
-                <string>${app} - IPA BLACK</string>
+                <string>${app} - AshteMobile</string>
             </dict>
         </dict>
     </array>
