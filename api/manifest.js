@@ -22,12 +22,12 @@ export default async function handler(req, res) {
         console.log("Fallback to default bundle id");
     }
 
-    // ناوی وێنە نوێیەکانی ئەپەکانت بەپێی خواستی خۆت
+    // ناوی وێنەکان ڕاستەوخۆ لە ریپۆزتۆرییەکەی خۆت
     const customIcons = {
-        'ashtemobile': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/Ashtemobile.jpeg',
-        'esign': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/Esign.jpeg',
-        'ksign': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/Ksign.jpeg',
-        'mytv': 'https://raw.githubusercontent.com/ipa-black/Signer/refs/heads/main/icons/mytv.jpeg'
+        'ashtemobile': 'https://raw.githubusercontent.com/mzereashte94/Mzere/main/icons/Ashtemobile.jpeg',
+        'esign': 'https://raw.githubusercontent.com/mzereashte94/Mzere/main/icons/Esign.jpeg',
+        'ksign': 'https://raw.githubusercontent.com/mzereashte94/Mzere/main/icons/Ksign.jpeg',
+        'mytv': 'https://raw.githubusercontent.com/mzereashte94/Mzere/main/icons/mytv.jpeg'
     };
     
     const iconUrl = customIcons[app.toLowerCase()] || customIcons['ashtemobile'];
