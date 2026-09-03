@@ -29,7 +29,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # 1. تخطي حماية الشهادات لـ Ubuntu-latest (OpenSSL 3 Bypass)
           cat << 'EOF' > /tmp/custom_openssl.cnf
           openssl_conf = openssl_init
           [openssl_init]
@@ -44,7 +43,6 @@ jobs:
           EOF
           export OPENSSL_CONF=/tmp/custom_openssl.cnf
           
-          # 2. تحديد الأسماء بمرونة تامة لتقسيم الحالات وعدم حدوث الخطأ
           LOWER_APP=$(echo "$APP_NAME" | tr '[:upper:]' '[:lower:]')
           
           if [[ "$LOWER_APP" == "ashtemobile" ]]; then
@@ -69,7 +67,6 @@ jobs:
             REAL_NAME="AshteMobile"
           fi
 
-          # 3. تنفيذ المهام بالتوازي لأقصى سرعة
           (
             wget -qO- https://github.com/zhlynn/zsign/releases/download/v1.0.4/zsign-linux-x86_64.tar.gz | tar -xz
             chmod +x zsign
@@ -93,16 +90,22 @@ jobs:
           
           wait
 
-          # استخراج كلمة المرور
           if [[ "$USE_FREE_CERT" == "true" ]]; then CERT_PASSWORD=$(cat "$GITHUB_WORKSPACE/cert/pass.txt" | tr -d '\n\r');
           else CERT_PASSWORD=$(echo "$CUSTOM_PASSWORD" | tr -d '\n\r'); fi
 
-          # 4. الحقن السريع جداً 
-          APP_DIR=$(unzip -Z1 raw_app.ipa | grep -m1 '^Payload/[^/]*.app/')
-          unzip -qq raw_app.ipa "${APP_DIR}Info.plist"
+          # استخراج وتعديل آمن جداً بدون أخطاء unzip
+          APP_DIR=$(python3 -c "
+          import zipfile
+          with zipfile.ZipFile('raw_app.ipa', 'r') as z:
+              for name in z.namelist():
+                  if name.startswith('Payload/') and name.endswith('.app/Info.plist'):
+                      print(name.replace('Info.plist', ''))
+                      break
+          ")
+          
+          unzip -q raw_app.ipa "${APP_DIR}Info.plist"
           mv downloaded_icon.png "${APP_DIR}CustomIpaBlackIcon.png"
 
-          # 5. بايثون محسّن ولحظي
           python3 -c '
           import plistlib, sys
           app_name, app_dir = sys.argv[1], sys.argv[2]
@@ -113,7 +116,8 @@ jobs:
               pl["CFBundleIcons"] = {"CFBundlePrimaryIcon": {"CFBundleIconFiles": ["CustomIpaBlackIcon"], "UIPrerenderedIcon": True}}
               if "CFBundleIcons~ipad" in pl: pl["CFBundleIcons~ipad"] = pl["CFBundleIcons"]
               with open(plist_path, "wb") as f: plistlib.dump(pl, f)
-          except: print(f"com.ashtemobile.{app_name.lower()}")
+          except Exception as e:
+              print(f"com.ashtemobile.{app_name.lower()}")
           ' "$REAL_NAME" "$APP_DIR" > bundle_id.txt
 
           if [[ "$REAL_NAME" == "Ksign" ]]; then
@@ -123,9 +127,7 @@ jobs:
             echo "$CERT_PASSWORD" > "${APP_DIR}signing-assets/PremiumCert/cert.txt"
           fi
 
-          # 6. التجميع والتوقيع
           zip -q0ur raw_app.ipa Payload
           ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -o "${REAL_NAME}_signed.ipa" raw_app.ipa
 
-          # 7. الرفع النهائي على ريليس V1
           gh release upload V1 "${REAL_NAME}_signed.ipa" "bundle_id.txt" --clobber --repo ${{ github.repository }}
