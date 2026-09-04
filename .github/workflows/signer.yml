@@ -101,28 +101,29 @@ jobs:
               echo "$CERT_PASSWORD" > "${APP_DIR}signing-assets/PremiumCert/cert.txt" || true
             fi
 
-            # ناسنامەیەکی جێگیر و نەگۆڕ بۆ هەریەکەیان
-            UNIQUE_BUNDLE="com.ashtemobile.${LOWER_APP}.vip"
+            # دانانی ناوێکی جێگیر بۆ هەریەکەیان بەبێ دروستکردنی فایلی txt
+            STATIC_BUNDLE="com.ashte.${LOWER_APP}.app"
 
             python3 -c '
           import plistlib, sys
-          app_dir, unique_bndl = sys.argv[1], sys.argv[2]
+          app_dir, static_bndl = sys.argv[1], sys.argv[2]
           plist_path = f"{app_dir}Info.plist"
           try:
               with open(plist_path, "rb") as f: pl = plistlib.load(f)
-              pl["CFBundleIdentifier"] = unique_bndl
+              pl["CFBundleIdentifier"] = static_bndl
               pl["CFBundleIcons"] = {"CFBundlePrimaryIcon": {"CFBundleIconFiles": ["CustomIpaBlackIcon"], "UIPrerenderedIcon": True}}
               if "CFBundleIcons~ipad" in pl: pl["CFBundleIcons~ipad"] = pl["CFBundleIcons"]
               with open(plist_path, "wb") as f: plistlib.dump(pl, f)
           except Exception as e:
               pass
-            ' "$APP_DIR" "$UNIQUE_BUNDLE" || true
+            ' "$APP_DIR" "$STATIC_BUNDLE" || true
 
             zip -q0ur raw_app.ipa Payload || true
           fi
           
           ./zsign -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -o "${REAL_NAME}_signed.ipa" raw_app.ipa
           
+          # تەنها فایلی ipa بەرز دەکاتەوە
           if [ -f "${REAL_NAME}_signed.ipa" ]; then
             gh release upload V1 "${REAL_NAME}_signed.ipa" --clobber --repo ${{ github.repository }}
           else
