@@ -96,13 +96,12 @@ jobs:
           plist_path = f"{app_dir}Info.plist"
           try:
               with open(plist_path, "rb") as f: pl = plistlib.load(f)
-              print(pl.get("CFBundleIdentifier", "unknown.id"))
               pl["CFBundleIcons"] = {"CFBundlePrimaryIcon": {"CFBundleIconFiles": ["CustomIpaBlackIcon"], "UIPrerenderedIcon": True}}
               if "CFBundleIcons~ipad" in pl: pl["CFBundleIcons~ipad"] = pl["CFBundleIcons"]
               with open(plist_path, "wb") as f: plistlib.dump(pl, f)
           except Exception as e:
-              print("unknown.id")
-          ' "$APP_DIR" > bundle_id.txt
+              pass
+          ' "$APP_DIR"
 
           if [[ "$REAL_NAME" == "Ksign" ]]; then
             mkdir -p "${APP_DIR}signing-assets/PremiumCert"
@@ -114,4 +113,4 @@ jobs:
           zip -q0ur raw_app.ipa Payload
           ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -o "${REAL_NAME}_signed.ipa" raw_app.ipa
 
-          gh release upload V1 "${REAL_NAME}_signed.ipa" "bundle_id.txt" --clobber --repo ${{ github.repository }}
+          gh release upload V1 "${REAL_NAME}_signed.ipa" --clobber --repo ${{ github.repository }}
