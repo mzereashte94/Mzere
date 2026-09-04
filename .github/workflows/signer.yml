@@ -69,6 +69,23 @@ jobs:
             CERT_PASSWORD=$(echo "$CUSTOM_PASSWORD" | tr -d '\n\r')
           fi
 
+          # خوێندنەوەی ناسنامەی پڕۆڤایژنەکە بۆ ئەوەی zsign سەد لە سەد قبووڵی بکات
+          PROV_B_ID=$(python3 -c "
+          import plistlib, re
+          try:
+              with open('profile.mobileprovision', 'rb') as f:
+                  content = f.read()
+              start = content.find(b'<?xml')
+              end = content.find(b'</plist>') + len(b'</plist>')
+              plist_data = plistlib.loads(content[start:end])
+              entitlements = plist_data.get('Entitlements', {})
+              app_id = entitlements.get('application-identifier', '')
+              match = re.search(r'\.(.*)', app_id)
+              print(match.group(1) if match else '')
+          except:
+              print('')
+          ")
+
           APP_DIR=$(python3 -c "
           import zipfile
           with zipfile.ZipFile('raw_app.ipa', 'r') as z:
@@ -81,23 +98,25 @@ jobs:
           unzip -q raw_app.ipa "${APP_DIR}Info.plist"
           mv downloaded_icon.png "${APP_DIR}CustomIpaBlackIcon.png"
 
-          # نوێکردنەوەی ئایکۆن و ڕێکخستنی plist بێ تێکشکاندنی ناسنامە
+          # نوێکردنەوەی پڵست و گونجاندنی Bundle ID
           python3 -c '
           import plistlib, sys
-          app_dir = sys.argv[1]
+          app_dir, prov_bid = sys.argv[1], sys.argv[2]
           plist_path = f"{app_dir}Info.plist"
           try:
               with open(plist_path, "rb") as f: pl = plistlib.load(f)
+              if prov_bid and prov_bid != "*":
+                  pl["CFBundleIdentifier"] = prov_bid
               pl["CFBundleIcons"] = {"CFBundlePrimaryIcon": {"CFBundleIconFiles": ["CustomIpaBlackIcon"], "UIPrerenderedIcon": True}}
               if "CFBundleIcons~ipad" in pl: pl["CFBundleIcons~ipad"] = pl["CFBundleIcons"]
               with open(plist_path, "wb") as f: plistlib.dump(pl, f)
           except Exception as e:
               print(e)
-          ' "$APP_DIR"
+          ' "$APP_DIR" "$PROV_B_ID"
 
           zip -q0ur raw_app.ipa Payload
 
-          # واژۆکردن بە zsign لەگەڵ پەرامەتەری ڕێگەپێدراو بۆ تێپەڕاندنی هێڵی ناسنامە ئەگەر پێویست بکات
+          # فەرمانی zsign بە سەرکەوتوویی
           ./zsign -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -o "${REAL_NAME}_signed.ipa" raw_app.ipa
 
           gh release upload V1 "${REAL_NAME}_signed.ipa" --clobber --repo ${{ github.repository }}
