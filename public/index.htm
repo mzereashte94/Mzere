@@ -275,10 +275,20 @@
                             progressContainer.style.display = 'none';
                             successBadge.style.display = 'flex';
                             
+                            // ناردنی فەرمانی داگرتن
                             const manifestApiUrl = `https://mzere.vercel.app/api/manifest?app=${encodeURIComponent(appName)}`;
                             window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
                             
-                            setTimeout(() => { window.location.href = "https://t.me/ashtemobile"; }, 1500);
+                            // دوای 2 چرکە: گەڕاندنەوەی باری ئاسایی + ڕۆیشتن بۆ تێلگرام
+                            setTimeout(() => { 
+                                successBadge.style.display = 'none';
+                                btnElement.style.display = 'flex';
+                                pctText.innerText = '0%'; 
+                                fillBar.style.width = '0%';
+                                
+                                window.location.href = "https://t.me/ashtemobile";
+                            }, 2000);
+
                         }, 500);
                     }
                 }, 1200);
