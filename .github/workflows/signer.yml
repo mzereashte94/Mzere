@@ -65,7 +65,6 @@ jobs:
           (
             cp "$GITHUB_WORKSPACE/icons/$ICON_NAME" downloaded_icon.png
             if [[ "$USE_FREE_CERT" == "true" ]]; then
-              # هنا التغيير: نستخدم المجلد المختار (CERT_ID)
               cp "$GITHUB_WORKSPACE/cert/$CERT_ID/cert.p12" ./cert.p12
               cp "$GITHUB_WORKSPACE/cert/$CERT_ID/profile.mobileprovision" ./profile.mobileprovision
             else
@@ -93,17 +92,17 @@ jobs:
 
           python3 -c '
           import plistlib, sys
-          app_name, app_dir = sys.argv[1], sys.argv[2]
+          app_dir = sys.argv[1]
           plist_path = f"{app_dir}Info.plist"
           try:
               with open(plist_path, "rb") as f: pl = plistlib.load(f)
-              print(pl.get("CFBundleIdentifier", f"com.ashtemobile.{app_name.lower()}"))
+              print(pl.get("CFBundleIdentifier", "unknown.id"))
               pl["CFBundleIcons"] = {"CFBundlePrimaryIcon": {"CFBundleIconFiles": ["CustomIpaBlackIcon"], "UIPrerenderedIcon": True}}
               if "CFBundleIcons~ipad" in pl: pl["CFBundleIcons~ipad"] = pl["CFBundleIcons"]
               with open(plist_path, "wb") as f: plistlib.dump(pl, f)
           except Exception as e:
-              print(f"com.ashtemobile.{app_name.lower()}")
-          ' "$REAL_NAME" "$APP_DIR" > bundle_id.txt
+              print("unknown.id")
+          ' "$APP_DIR" > bundle_id.txt
 
           if [[ "$REAL_NAME" == "Ksign" ]]; then
             mkdir -p "${APP_DIR}signing-assets/PremiumCert"
