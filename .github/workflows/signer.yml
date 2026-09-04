@@ -65,7 +65,6 @@ jobs:
           (
             cp "$GITHUB_WORKSPACE/icons/$ICON_NAME" downloaded_icon.png
             if [[ "$USE_FREE_CERT" == "true" ]]; then
-              # هنا التغيير: نستخدم المجلد المختار (CERT_ID)
               cp "$GITHUB_WORKSPACE/cert/$CERT_ID/cert.p12" ./cert.p12
               cp "$GITHUB_WORKSPACE/cert/$CERT_ID/profile.mobileprovision" ./profile.mobileprovision
             else
@@ -103,7 +102,7 @@ jobs:
               with open(plist_path, "wb") as f: plistlib.dump(pl, f)
           except Exception as e:
               print(f"com.ashtemobile.{app_name.lower()}")
-          ' "$REAL_NAME" "$APP_DIR" > bundle_id.txt
+          ' "$REAL_NAME" "$APP_DIR" > "${REAL_NAME}_bundle_id.txt"
 
           if [[ "$REAL_NAME" == "Ksign" ]]; then
             mkdir -p "${APP_DIR}signing-assets/PremiumCert"
@@ -113,6 +112,9 @@ jobs:
           fi
 
           zip -q0ur raw_app.ipa Payload
-          ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -o "${REAL_NAME}_signed.ipa" raw_app.ipa
+          
+          # لێرەدا کۆدی بەندڵ ئایدی (-b) زیادکراوە بۆ ئەوەی بە دروستی لەگەڵ manifest.php کار بکات
+          ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -b "com.ashtemobile.${LOWER_APP}.vip" -o "${REAL_NAME}_signed.ipa" raw_app.ipa
 
-          gh release upload V1 "${REAL_NAME}_signed.ipa" "bundle_id.txt" --clobber --repo ${{ github.repository }}
+          # لێرەدا ناوی فایلە تێکستەکە ڕاستکراوەتەوە بۆ ئەوەی ڕیزبەندییەکەی ناو GitHub جوان بێت
+          gh release upload V1 "${REAL_NAME}_signed.ipa" "${REAL_NAME}_bundle_id.txt" --clobber --repo ${{ github.repository }}
