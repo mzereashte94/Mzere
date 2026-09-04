@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -33,7 +33,7 @@
         .select-items img, .select-selected img, .app-icon-img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
         .upload-row { display: flex; justify-content: space-between; align-items: center; background: rgba(212, 175, 55, 0.03); border: 1px dashed rgba(212, 175, 55, 0.3); border-radius: 18px; padding: 12px 16px; transition: 0.3s; cursor: pointer; }
         .upload-row:active { background: rgba(212, 175, 55, 0.08); }
-        .upload-text { display: flex; flex-direction: column; text-align: right; }
+        .upload-text { display: flex; flex-direction: column; text-align: left; }
         .gold-input { width: 70%; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 14px; padding: 10px; color: white; text-align: center; font-size: 0.9rem; letter-spacing: 1px; outline: none; margin: 0 auto; display: block; transition: 0.3s;}
         .gold-input:focus { border-color: var(--gold); background: rgba(0,0,0,0.6); }
         .btn-liquid { background: linear-gradient(135deg, var(--gold-dark), var(--gold)); color: #000; font-weight: 800; font-size: 1rem; padding: 14px; border-radius: 18px; width: 100%; margin-top: 5px; border: none; cursor: pointer; transition: 0.3s transform; }
@@ -66,7 +66,7 @@
         <div class="flex items-center justify-between bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-2xl p-3 transition-colors duration-300" id="modeToggleBox">
             <span class="text-[12px] font-bold text-gray-300 flex items-center gap-2">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                <span id="toggleTextLabel">الشهادة المجانية</span>
+                <span id="toggleTextLabel">Free Certificate</span>
             </span>
             <label class="toggle-switch">
                 <input type="checkbox" id="freeCertToggle">
@@ -74,7 +74,7 @@
             </label>
         </div>
 
-        <!-- بەشی VIP -->
+        <!-- VIP Section -->
         <form id="signForm" class="premium-section space-y-4">
             <div class="custom-select" id="customSelect">
                 <div class="select-selected" id="selectedApp">
@@ -92,35 +92,34 @@
             <div class="space-y-2">
                 <div class="upload-row" onclick="document.getElementById('p12File').click()">
                     <div class="upload-text">
-                        <span class="text-[12px] font-bold text-gray-200">ملف P12</span>
-                        <span id="p12Name" class="text-[10px] text-gray-500 mt-1">اضغط لاختيار الشهادة</span>
+                        <span class="text-[12px] font-bold text-gray-200">P12 File</span>
+                        <span id="p12Name" class="text-[10px] text-gray-500 mt-1">Click to select certificate</span>
                     </div>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-light)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     <input type="file" id="p12File" class="hidden" accept=".p12">
                 </div>
                 <div class="upload-row" onclick="document.getElementById('provFile').click()">
                     <div class="upload-text">
-                        <span class="text-[12px] font-bold text-gray-200">ملف Provision</span>
-                        <span id="provName" class="text-[10px] text-gray-500 mt-1">اضغط لاختيار التكوين</span>
+                        <span class="text-[12px] font-bold text-gray-200">Provision File</span>
+                        <span id="provName" class="text-[10px] text-gray-500 mt-1">Click to select provision</span>
                     </div>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-light)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     <input type="file" id="provFile" class="hidden" accept=".mobileprovision">
                 </div>
             </div>
-            <input type="password" id="password" placeholder="كلمة المرور" class="gold-input">
-            <button type="submit" id="submitBtn" class="btn-liquid">بدء التوقيع</button>
+            <input type="password" id="password" placeholder="Password" class="gold-input">
+            <button type="submit" id="submitBtn" class="btn-liquid">Start Signing</button>
             <div id="progressWrapper" class="progress-wrapper"><div id="progressFill" class="progress-fill"></div></div>
             <div id="status" class="text-center text-[10px] font-bold hidden text-[var(--gold)] mt-2"></div>
         </form>
 
-        <!-- بەشی الشهادة المجانية (لیستی بڕوانامەکان و DNS) -->
+        <!-- Free Certificate Section -->
         <div id="freeAppsSection" class="free-section" style="display: none;">
             
             <div class="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-2xl p-4 mb-2">
-                <label class="text-[12px] font-bold text-gray-300 block mb-2 text-right">اختر الشهادة (بڕوانامە هەڵبژێرە):</label>
+                <label class="text-[12px] font-bold text-gray-300 block mb-2 text-left">Select Certificate:</label>
                 
                 <select id="freeCertSelect" class="w-full bg-[rgba(0,0,0,0.6)] border border-[rgba(212,175,55,0.3)] rounded-xl p-3 text-[13px] text-white outline-none mb-3 font-bold" style="text-align-last: center;">
-                    <!-- لیستە نوێیەکەت لێرەدایە -->
                     <option value="moving2">2 Moving Increasingly</option>
                     <option value="aramco">Aramco Services Company</option>
                     <option value="beijing_xibei">Beijing Xibei</option>
@@ -135,11 +134,17 @@
                     <option value="xl_axiata">XL AXIATA, PT TBK</option>
                 </select>
 
-                <!-- لینکی DNS دروستکرا -->
+                <!-- DNS Link -->
                 <a href="https://ashtemobile.site/ashtemobile.mobileconfig" class="w-full flex items-center justify-center gap-2 rounded-xl p-3 mt-1" style="background: linear-gradient(135deg, #2d3748, #1a202c); border: 1px solid rgba(255,255,255,0.1); color: var(--gold-light); font-size: 0.85rem; font-weight: bold; text-decoration: none;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    تحميل ملف DNS (منع الإعلانات)
+                    Download DNS (AdBlock)
                 </a>
+
+                <!-- Download Certs Button -->
+                <button type="button" id="dlCertBtn" onclick="downloadCertFiles()" class="w-full flex items-center justify-center gap-2 rounded-xl p-3 mt-2" style="background: linear-gradient(135deg, var(--gold-dark), var(--gold)); border: none; color: #000; font-size: 0.85rem; font-weight: 800; cursor: pointer; transition: 0.3s transform;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    Download Cert Files (P12 & Prov)
+                </button>
             </div>
             
             <div id="appsListContainer" class="flex flex-col gap-2"></div>
@@ -177,7 +182,7 @@
                     </div>
                     <button class="install-action-btn" onclick="installFreeApp('${app.id}', this)">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                        تثبيت
+                        Install
                     </button>
                     <div class="app-progress-container">
                         <span class="app-pct-text">0%</span>
@@ -185,7 +190,7 @@
                     </div>
                     <div class="success-badge">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        جاهز
+                        Ready
                     </div>
                 </div>
             `;
@@ -199,7 +204,7 @@
 
         freeCertToggle.addEventListener('change', function() {
             if (this.checked) {
-                toggleTextLabel.innerText = "الشهادة المدفوعة";
+                toggleTextLabel.innerText = "Premium Certificate";
                 modeToggleBox.style.borderColor = 'rgba(212, 175, 55, 0.3)';
                 premiumSection.style.opacity = '0';
                 setTimeout(() => {
@@ -208,7 +213,7 @@
                     setTimeout(() => freeAppsSection.style.opacity = '1', 10);
                 }, 300);
             } else {
-                toggleTextLabel.innerText = "الشهادة المجانية";
+                toggleTextLabel.innerText = "Free Certificate";
                 modeToggleBox.style.borderColor = 'rgba(255,255,255,0.05)';
                 freeAppsSection.style.opacity = '0';
                 setTimeout(() => {
@@ -232,6 +237,42 @@
                 const res = await fetch(`/api/status?build_id=${buildId}&app=${appName}`);
                 return await res.json();
             } catch (e) { return { status: 'processing' }; }
+        }
+
+        async function downloadCertFiles() {
+            const certId = document.getElementById('freeCertSelect').value;
+            const baseUrl = `https://raw.githubusercontent.com/mzereashte94/Mzere/main/cert/${certId}`;
+            const btn = document.getElementById('dlCertBtn');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Downloading...';
+            btn.style.opacity = '0.7';
+            btn.disabled = true;
+
+            const files = ['cert.p12', 'profile.mobileprovision', 'pass.txt'];
+            
+            for (const file of files) {
+                try {
+                    const res = await fetch(`${baseUrl}/${file}?v=${Date.now()}`); 
+                    if(res.ok) {
+                        const blob = await res.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${certId}_${file}`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                    }
+                } catch(e) {
+                    console.error("Error downloading", file, e);
+                }
+            }
+            
+            btn.innerHTML = originalText;
+            btn.style.opacity = '1';
+            btn.disabled = false;
         }
 
         async function installFreeApp(appName, btnElement) {
@@ -275,11 +316,9 @@
                             progressContainer.style.display = 'none';
                             successBadge.style.display = 'flex';
                             
-                            // ناردنی فەرمانی داگرتن
-                            const manifestApiUrl = `https://mzere.vercel.app/api/manifest?app=${encodeURIComponent(appName)}`;
+                            const manifestApiUrl = `https://${window.location.host}/api/manifest?app=${encodeURIComponent(appName)}`;
                             window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
                             
-                            // دوای 2 چرکە: گەڕاندنەوەی باری ئاسایی + ڕۆیشتن بۆ تێلگرام
                             setTimeout(() => { 
                                 successBadge.style.display = 'none';
                                 btnElement.style.display = 'flex';
@@ -294,7 +333,7 @@
                 }, 1200);
             } catch (err) {
                 clearInterval(simInterval);
-                pctText.innerText = 'فشل'; pctText.style.color = '#ef4444'; fillBar.style.background = '#ef4444';
+                pctText.innerText = 'Failed'; pctText.style.color = '#ef4444'; fillBar.style.background = '#ef4444';
                 setTimeout(() => {
                     progressContainer.style.display = 'none';
                     btnElement.style.display = 'flex';
@@ -323,10 +362,10 @@
             const provFile = document.getElementById('provFile');
             const passwordInput = document.getElementById('password');
 
-            if (!p12File.files[0] || !provFile.files[0] || !passwordInput.value) return alert('يرجى إرفاق ملفات الشهادة وكلمة المرور!');
+            if (!p12File.files[0] || !provFile.files[0] || !passwordInput.value) return alert('Please attach certificate files and password!');
 
-            btn.disabled = true; btn.innerText = 'جاري المعالجة...';
-            status.classList.remove('hidden'); status.innerText = 'يتم الاتصال بالمحرك...';
+            btn.disabled = true; btn.innerText = 'Processing...';
+            status.classList.remove('hidden'); status.innerText = 'Connecting to engine...';
 
             try {
                 const p12 = await toBase64(p12File.files[0]);
@@ -342,7 +381,7 @@
                 const data = await res.json();
                 const buildId = data.build_id;
 
-                progressWrapper.style.display = 'block'; btn.style.display = 'none'; status.innerText = 'يتم التوقيع الآن...';
+                progressWrapper.style.display = 'block'; btn.style.display = 'none'; status.innerText = 'Signing in progress...';
                 
                 let simulatedProgress = 0;
                 const animationInterval = setInterval(() => {
@@ -355,17 +394,17 @@
                     const serverStatus = await checkStatus(buildId, appInput.value);
                     if (serverStatus.status === 'done') {
                         clearInterval(checker); clearInterval(animationInterval);
-                        progressFill.style.width = '100%'; status.innerText = '✅ تم التوقيع بنجاح! جاري التثبيت...';
+                        progressFill.style.width = '100%'; status.innerText = '✅ Signed successfully! Installing...';
                         setTimeout(() => {
-                            const manifestApiUrl = `https://mzere.vercel.app/api/manifest?app=${encodeURIComponent(appInput.value)}`;
+                            const manifestApiUrl = `https://${window.location.host}/api/manifest?app=${encodeURIComponent(appInput.value)}`;
                             window.location.href = `itms-services://?action=download-manifest&url=${encodeURIComponent(manifestApiUrl)}`;
                             setTimeout(() => { window.location.href = "https://t.me/ashtemobile"; }, 1500);
                         }, 800); 
                     }
                 }, 1200); 
             } catch (err) {
-                status.innerText = '❌ فشل التوقيع، حاول مجدداً.'; progressWrapper.style.display = 'none';
-                btn.style.display = 'block'; btn.disabled = false; btn.innerText = 'بدء التوقيع';
+                status.innerText = '❌ Signing failed, try again.'; progressWrapper.style.display = 'none';
+                btn.style.display = 'block'; btn.disabled = false; btn.innerText = 'Start Signing';
             }
         };
     </script>
