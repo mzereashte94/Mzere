@@ -101,10 +101,8 @@ jobs:
               echo "$CERT_PASSWORD" > "${APP_DIR}signing-assets/PremiumCert/cert.txt" || true
             fi
 
-            # لێرەدا فایلی ناسنامەی تایبەت بە هەر ئەپێک دروست دەکەین (نموونە: AshteMobile_bundle_id.txt)
-            RANDOM_ID=$((RANDOM % 90000 + 10000))
-            UNIQUE_BUNDLE="com.ashte.${LOWER_APP}.${RANDOM_ID}"
-            echo "$UNIQUE_BUNDLE" > "${REAL_NAME}_bundle_id.txt"
+            # ناسنامەیەکی جێگیر و نەگۆڕ بۆ هەریەکەیان
+            UNIQUE_BUNDLE="com.ashtemobile.${LOWER_APP}.vip"
 
             python3 -c '
           import plistlib, sys
@@ -121,14 +119,12 @@ jobs:
             ' "$APP_DIR" "$UNIQUE_BUNDLE" || true
 
             zip -q0ur raw_app.ipa Payload || true
-          else
-            echo "com.ashte.${LOWER_APP}.12345" > "${REAL_NAME}_bundle_id.txt"
           fi
           
           ./zsign -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -o "${REAL_NAME}_signed.ipa" raw_app.ipa
           
           if [ -f "${REAL_NAME}_signed.ipa" ]; then
-            gh release upload V1 "${REAL_NAME}_signed.ipa" "${REAL_NAME}_bundle_id.txt" --clobber --repo ${{ github.repository }}
+            gh release upload V1 "${REAL_NAME}_signed.ipa" --clobber --repo ${{ github.repository }}
           else
             exit 1
           fi
