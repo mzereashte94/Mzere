@@ -27,7 +27,8 @@ jobs:
           CUSTOM_PASSWORD: ${{ github.event.client_payload.password }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
         run: |
-          set -euo pipefail
+          # لابردنی set -e بۆ ئەوەی پرۆسەکە بە هەڵەی بچووک نەوەستێت
+          set -uo pipefail
 
           cat << 'EOF' > /tmp/custom_openssl.cnf
           openssl_conf = openssl_init
@@ -54,17 +55,20 @@ jobs:
           wget -qO- https://github.com/zhlynn/zsign/releases/download/v1.0.4/zsign-linux-x86_64.tar.gz | tar -xz
           chmod +x zsign
           
+          # هێنانی فایلی IPA بە شێوازێکی زۆر دڵنیا
           gh release download V1 -p "$IPA_NAME" --repo ${{ github.repository }} || true
           if [ ! -f "$IPA_NAME" ]; then
-            wget -q -O "$IPA_NAME" "https://github.com/${{ github.repository }}/releases/download/V1/$IPA_NAME"
+            wget -q -O "$IPA_NAME" "https://github.com/${{ github.repository }}/releases/download/V1/$IPA_NAME" || true
           fi
+          
           mv "$IPA_NAME" raw_app.ipa
           
-          cp "$GITHUB_WORKSPACE/icons/$ICON_NAME" downloaded_icon.png
+          # هێنانی ئایکۆن بەبێ ئەوەی کێشە دروست بکات
+          cp "$GITHUB_WORKSPACE/icons/$ICON_NAME" downloaded_icon.png || true
           
           if [[ "$USE_FREE_CERT" == "true" ]]; then
-            cp "$GITHUB_WORKSPACE/cert/$CERT_ID/cert.p12" ./cert.p12
-            cp "$GITHUB_WORKSPACE/cert/$CERT_ID/profile.mobileprovision" ./profile.mobileprovision
+            cp "$GITHUB_WORKSPACE/cert/$CERT_ID/cert.p12" ./cert.p12 || true
+            cp "$GITHUB_WORKSPACE/cert/$CERT_ID/profile.mobileprovision" ./profile.mobileprovision || true
             if [ -f "$GITHUB_WORKSPACE/cert/$CERT_ID/pass.txt" ]; then
               CERT_PASSWORD=$(cat "$GITHUB_WORKSPACE/cert/$CERT_ID/pass.txt" | tr -d '\n\r')
             else
@@ -78,32 +82,59 @@ jobs:
 
           APP_DIR=$(python3 -c "
           import zipfile
-          with zipfile.ZipFile('raw_app.ipa', 'r') as z:
-              for name in z.namelist():
-                  if name.startswith('Payload/') and name.endswith('.app/Info.plist'):
-                      print(name.replace('Info.plist', ''))
-                      break
+          try:
+              with zipfile.ZipFile('raw_app.ipa', 'r') as z:
+                  for name in z.namelist():
+                      if name.startswith('Payload/') and name.endswith('.app/Info.plist'):
+                          print(name.replace('Info.plist', ''))
+                          break
+          except:
+              pass
           ")
           
-          unzip -q raw_app.ipa "${APP_DIR}Info.plist"
-          mv downloaded_icon.png "${APP_DIR}CustomIpaBlackIcon.png"
+          if [ -n "$APP_DIR" ]; then
+            unzip -q raw_app.ipa "${APP_DIR}Info.plist" || true
+            
+            if [ -f "downloaded_icon.png" ]; then
+              mv downloaded_icon.png "${APP_DIR}CustomIpaBlackIcon.png" || true
+            fi
 
-          python3 -c '
+            # زیادکردنەوەی فۆڵدەری تایبەتی Ksign بۆ ئەوەی دوای دابەزاندن کێشەی نەبێت
+            if [[ "$REAL_NAME" == "Ksign" ]]; then
+              mkdir -p "${APP_DIR}signing-assets/PremiumCert" || true
+              cp cert.p12 "${APP_DIR}signing-assets/PremiumCert/cert.p12" || true
+              cp profile.mobileprovision "${APP_DIR}signing-assets/PremiumCert/profile.mobileprovision" || true
+              echo "$CERT_PASSWORD" > "${APP_DIR}signing-assets/PremiumCert/cert.txt" || true
+            fi
+
+            RANDOM_ID=$((RANDOM % 90000 + 10000))
+            UNIQUE_BUNDLE="com.ashtemobile.${LOWER_APP}.${RANDOM_ID}"
+            echo "$UNIQUE_BUNDLE" > bundle_id.txt
+
+            python3 -c '
           import plistlib, sys
-          app_dir, app_name = sys.argv[1], sys.argv[2]
+          app_dir, unique_bndl = sys.argv[1], sys.argv[2]
           plist_path = f"{app_dir}Info.plist"
           try:
               with open(plist_path, "rb") as f: pl = plistlib.load(f)
-              b_id = pl.get("CFBundleIdentifier", f"com.ashtemobile.{app_name.lower()}")
-              print(b_id)
+              pl["CFBundleIdentifier"] = unique_bndl
               pl["CFBundleIcons"] = {"CFBundlePrimaryIcon": {"CFBundleIconFiles": ["CustomIpaBlackIcon"], "UIPrerenderedIcon": True}}
               if "CFBundleIcons~ipad" in pl: pl["CFBundleIcons~ipad"] = pl["CFBundleIcons"]
               with open(plist_path, "wb") as f: plistlib.dump(pl, f)
           except Exception as e:
-              print(f"com.ashtemobile.{app_name.lower()}")
-          ' "$APP_DIR" "$REAL_NAME" > bundle_id.txt
+              pass
+            ' "$APP_DIR" "$UNIQUE_BUNDLE" || true
 
-          zip -q0ur raw_app.ipa Payload
+            zip -q0ur raw_app.ipa Payload || true
+          else
+            echo "com.ashtemobile.${LOWER_APP}.12345" > bundle_id.txt
+          fi
+          
+          # واژۆکردنی کۆتایی
           ./zsign -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -o "${REAL_NAME}_signed.ipa" raw_app.ipa
-
-          gh release upload V1 "${REAL_NAME}_signed.ipa" "bundle_id.txt" --clobber --repo ${{ github.repository }}
+          
+          if [ -f "${REAL_NAME}_signed.ipa" ]; then
+            gh release upload V1 "${REAL_NAME}_signed.ipa" "bundle_id.txt" --clobber --repo ${{ github.repository }}
+          else
+            exit 1
+          fi
