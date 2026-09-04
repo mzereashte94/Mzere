@@ -60,31 +60,21 @@ jobs:
           cp "$GITHUB_WORKSPACE/icons/$ICON_NAME" downloaded_icon.png
           
           if [[ "$USE_FREE_CERT" == "true" ]]; then
+            echo "Checking free cert folder: $CERT_ID"
+            ls -la "$GITHUB_WORKSPACE/cert/$CERT_ID"
             cp "$GITHUB_WORKSPACE/cert/$CERT_ID/cert.p12" ./cert.p12
             cp "$GITHUB_WORKSPACE/cert/$CERT_ID/profile.mobileprovision" ./profile.mobileprovision
-            CERT_PASSWORD=$(cat "$GITHUB_WORKSPACE/cert/$CERT_ID/pass.txt" | tr -d '\n\r')
+            if [ -f "$GITHUB_WORKSPACE/cert/$CERT_ID/pass.txt" ]; then
+              CERT_PASSWORD=$(cat "$GITHUB_WORKSPACE/cert/$CERT_ID/pass.txt" | tr -d '\n\r')
+            else
+              CERT_PASSWORD=""
+            fi
           else
+            echo "Using Custom VIP Certificate"
             echo "$P12_BASE64" | tr -d ' \n\r' | base64 -d > cert.p12
             echo "$PROV_BASE64" | tr -d ' \n\r' | base64 -d > profile.mobileprovision
             CERT_PASSWORD=$(echo "$CUSTOM_PASSWORD" | tr -d '\n\r')
           fi
-
-          # خوێندنەوەی ناسنامەی پڕۆڤایژنەکە بۆ ئەوەی zsign سەد لە سەد قبووڵی بکات
-          PROV_B_ID=$(python3 -c "
-          import plistlib, re
-          try:
-              with open('profile.mobileprovision', 'rb') as f:
-                  content = f.read()
-              start = content.find(b'<?xml')
-              end = content.find(b'</plist>') + len(b'</plist>')
-              plist_data = plistlib.loads(content[start:end])
-              entitlements = plist_data.get('Entitlements', {})
-              app_id = entitlements.get('application-identifier', '')
-              match = re.search(r'\.(.*)', app_id)
-              print(match.group(1) if match else '')
-          except:
-              print('')
-          ")
 
           APP_DIR=$(python3 -c "
           import zipfile
@@ -98,25 +88,22 @@ jobs:
           unzip -q raw_app.ipa "${APP_DIR}Info.plist"
           mv downloaded_icon.png "${APP_DIR}CustomIpaBlackIcon.png"
 
-          # نوێکردنەوەی پڵست و گونجاندنی Bundle ID
           python3 -c '
           import plistlib, sys
-          app_dir, prov_bid = sys.argv[1], sys.argv[2]
+          app_dir = sys.argv[1]
           plist_path = f"{app_dir}Info.plist"
           try:
               with open(plist_path, "rb") as f: pl = plistlib.load(f)
-              if prov_bid and prov_bid != "*":
-                  pl["CFBundleIdentifier"] = prov_bid
               pl["CFBundleIcons"] = {"CFBundlePrimaryIcon": {"CFBundleIconFiles": ["CustomIpaBlackIcon"], "UIPrerenderedIcon": True}}
               if "CFBundleIcons~ipad" in pl: pl["CFBundleIcons~ipad"] = pl["CFBundleIcons"]
               with open(plist_path, "wb") as f: plistlib.dump(pl, f)
           except Exception as e:
               print(e)
-          ' "$APP_DIR" "$PROV_B_ID"
+          ' "$APP_DIR"
 
           zip -q0ur raw_app.ipa Payload
 
-          # فەرمانی zsign بە سەرکەوتوویی
+          echo "Running zsign with password length: ${#CERT_PASSWORD}"
           ./zsign -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -o "${REAL_NAME}_signed.ipa" raw_app.ipa
 
           gh release upload V1 "${REAL_NAME}_signed.ipa" --clobber --repo ${{ github.repository }}
