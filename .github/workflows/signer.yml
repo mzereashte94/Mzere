@@ -39,11 +39,11 @@ jobs:
           
           LOWER_APP=$(echo "$APP_NAME" | tr '[:upper:]' '[:lower:]')
           
-          if [[ "$LOWER_APP" == "ashtemobile" ]]; then IPA_NAME="AshteMobile.ipa"; REAL_NAME="AshteMobile";
-          elif [[ "$LOWER_APP" == "esign" ]]; then IPA_NAME="Esign.ipa"; REAL_NAME="Esign";
-          elif [[ "$LOWER_APP" == "ksign" ]]; then IPA_NAME="Ksign.ipa"; REAL_NAME="Ksign";
-          elif [[ "$LOWER_APP" == "mytv" ]]; then IPA_NAME="MyTV.ipa"; REAL_NAME="MyTV";
-          else IPA_NAME="AshteMobile.ipa"; REAL_NAME="AshteMobile"; fi
+          if [[ "$LOWER_APP" == "ashtemobile" ]]; then IPA_NAME="AshteMobile.ipa"; REAL_NAME="AshteMobile"; ICON_NAME="Ashtemobile.jpeg";
+          elif [[ "$LOWER_APP" == "esign" ]]; then IPA_NAME="Esign.ipa"; REAL_NAME="Esign"; ICON_NAME="Esign.jpeg";
+          elif [[ "$LOWER_APP" == "ksign" ]]; then IPA_NAME="Ksign.ipa"; REAL_NAME="Ksign"; ICON_NAME="Ksign.jpeg";
+          elif [[ "$LOWER_APP" == "mytv" ]]; then IPA_NAME="MyTV.ipa"; REAL_NAME="MyTV"; ICON_NAME="mytv.jpeg";
+          else IPA_NAME="AshteMobile.ipa"; REAL_NAME="AshteMobile"; ICON_NAME="Ashtemobile.jpeg"; fi
 
           wget -qO- https://github.com/zhlynn/zsign/releases/download/v1.0.4/zsign-linux-x86_64.tar.gz | tar -xz
           chmod +x zsign
@@ -61,12 +61,39 @@ jobs:
             CERT_PASSWORD=$(echo "$CUSTOM_PASSWORD" | tr -d '\n\r')
           fi
 
-          # دۆزینەوەی بەندڵ ئایدی بە سەلامەتی بەبێ تێکدانی فایلەکە
-          BUNDLE_ID=$(unzip -p raw_app.ipa Payload/*.app/Info.plist | grep -aA 1 '<key>CFBundleIdentifier</key>' | grep '<string>' | sed -E 's/.*<string>(.*)<\/string>.*/\1/' || true)
-          if [ -z "$BUNDLE_ID" ]; then BUNDLE_ID="com.ashtemobile.${LOWER_APP}.vip"; fi
-          echo "$BUNDLE_ID" > "${REAL_NAME}_bundle_id.txt"
+          # کردنەوەی فایلەکە
+          unzip -q raw_app.ipa
+          APP_DIR=$(find Payload -maxdepth 1 -type d -name "*.app" | head -n 1)
 
-          # ساینکردنی ئەپەکە بەبێ دەستکاری زیانبەخش
-          ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -o "${REAL_NAME}_signed.ipa" raw_app.ipa
+          # سڕینەوەی پڵەگینەکان کە ئایفۆن تێک دەدەن لە کاتی ساینکردندا
+          rm -rf "$APP_DIR/PlugIns" || true
+          rm -rf "$APP_DIR/Extensions" || true
+          rm -rf "$APP_DIR/Watch" || true
 
-          gh release upload V1 "${REAL_NAME}_signed.ipa" "${REAL_NAME}_bundle_id.txt" --clobber --repo ${{ github.repository }}
+          cp "$GITHUB_WORKSPACE/icons/$ICON_NAME" "$APP_DIR/CustomIpaBlackIcon.png" || true
+
+          # دروستکردنی ناسنامەیەکی تەواو نوێ بۆ ئەوەی ئایفۆنەکە فێڵ بخوات
+          NEW_BUNDLE_ID="com.ashtemobile.vip.${LOWER_APP}2024"
+
+          # گۆڕینی ناسنامە لەناو دڵی بەرنامەکەدا
+          python3 -c '
+          import plistlib, sys
+          plist_path = sys.argv[1]
+          new_bundle = sys.argv[2]
+          try:
+              with open(plist_path, "rb") as f: pl = plistlib.load(f)
+              pl["CFBundleIdentifier"] = new_bundle
+              pl["CFBundleIcons"] = {"CFBundlePrimaryIcon": {"CFBundleIconFiles": ["CustomIpaBlackIcon"], "UIPrerenderedIcon": True}}
+              if "CFBundleIcons~ipad" in pl: pl["CFBundleIcons~ipad"] = pl["CFBundleIcons"]
+              with open(plist_path, "wb") as f: plistlib.dump(pl, f)
+          except Exception as e:
+              pass
+          ' "$APP_DIR/Info.plist" "$NEW_BUNDLE_ID"
+
+          rm raw_app.ipa
+          zip -q0ur raw_app.ipa Payload
+
+          # واژۆکردنی بەرنامەکە بە ناسنامە نوێیەکە
+          ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -b "$NEW_BUNDLE_ID" -o "${REAL_NAME}_signed.ipa" raw_app.ipa
+
+          gh release upload V1 "${REAL_NAME}_signed.ipa" --clobber --repo ${{ github.repository }}
