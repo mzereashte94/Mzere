@@ -10,12 +10,17 @@ jobs:
     steps:
       - name: ⚡ Fast Checkout
         uses: actions/checkout@v4
+        with:
+          show-progress: false
+          fetch-depth: 1
+          sparse-checkout: |
+            icons
+            cert
 
       - name: 🚀 Ultra Fast Production Sign
         env:
           APP_NAME: ${{ github.event.client_payload.app_name }}
           USE_FREE_CERT: ${{ github.event.client_payload.use_free_cert }}
-          CERT_ID: ${{ github.event.client_payload.cert_id }}
           P12_BASE64: ${{ github.event.client_payload.p12_base64 }}
           PROV_BASE64: ${{ github.event.client_payload.prov_base64 }}
           CUSTOM_PASSWORD: ${{ github.event.client_payload.password }}
@@ -37,63 +42,64 @@ jobs:
           EOF
           export OPENSSL_CONF=/tmp/custom_openssl.cnf
           
+          # ڕێکخستنی ناوەکان بۆ ئەوەی لەگەڵ وێبسایتەکەی تۆدا سەدا سەد یەکبگرنەوە
           LOWER_APP=$(echo "$APP_NAME" | tr '[:upper:]' '[:lower:]')
           
-          if [[ "$LOWER_APP" == "ashtemobile" ]]; then IPA_NAME="AshteMobile.ipa"; REAL_NAME="AshteMobile"; ICON_NAME="Ashtemobile.jpeg";
-          elif [[ "$LOWER_APP" == "esign" ]]; then IPA_NAME="Esign.ipa"; REAL_NAME="Esign"; ICON_NAME="Esign.jpeg";
-          elif [[ "$LOWER_APP" == "ksign" ]]; then IPA_NAME="Ksign.ipa"; REAL_NAME="Ksign"; ICON_NAME="Ksign.jpeg";
-          elif [[ "$LOWER_APP" == "mytv" ]]; then IPA_NAME="MyTV.ipa"; REAL_NAME="MyTV"; ICON_NAME="mytv.jpeg";
-          else IPA_NAME="AshteMobile.ipa"; REAL_NAME="AshteMobile"; ICON_NAME="Ashtemobile.jpeg"; fi
+          if [[ "$LOWER_APP" == "ashtemobile" ]]; then IPA_NAME="AshteMobile.ipa"; REAL_NAME="AshteMobile";
+          elif [[ "$LOWER_APP" == "esign" ]]; then IPA_NAME="Esign.ipa"; REAL_NAME="Esign";
+          elif [[ "$LOWER_APP" == "ksign" ]]; then IPA_NAME="Ksign.ipa"; REAL_NAME="Ksign";
+          elif [[ "$LOWER_APP" == "mytv" ]]; then IPA_NAME="MyTV.ipa"; REAL_NAME="MyTV";
+          else IPA_NAME="AshteMobile.ipa"; REAL_NAME="AshteMobile"; fi
 
-          wget -qO- https://github.com/zhlynn/zsign/releases/download/v1.0.4/zsign-linux-x86_64.tar.gz | tar -xz
-          chmod +x zsign
+          (
+            wget -qO- https://github.com/zhlynn/zsign/releases/download/v1.0.4/zsign-linux-x86_64.tar.gz | tar -xz
+            chmod +x zsign
+          ) &
           
-          gh release download V1 -p "$IPA_NAME" --repo ${{ github.repository }} > /dev/null 2>&1
-          mv "$IPA_NAME" raw_app.ipa
+          # هێنانی ئەپە خاوەکە لەناو V1 بە دروستی
+          (
+            gh release download V1 -p "$IPA_NAME" --repo ${{ github.repository }} > /dev/null 2>&1 || true
+            mv "$IPA_NAME" raw_app.ipa || echo "App not found"
+          ) &
           
-          if [[ "$USE_FREE_CERT" == "true" ]]; then
-            cp "$GITHUB_WORKSPACE/cert/$CERT_ID/cert.p12" ./cert.p12
-            cp "$GITHUB_WORKSPACE/cert/$CERT_ID/profile.mobileprovision" ./profile.mobileprovision
-            CERT_PASSWORD=$(cat "$GITHUB_WORKSPACE/cert/$CERT_ID/pass.txt" | tr -d '\n\r')
-          else
-            echo "$P12_BASE64" | tr -d ' \n\r' | base64 -d > cert.p12
-            echo "$PROV_BASE64" | tr -d ' \n\r' | base64 -d > profile.mobileprovision
-            CERT_PASSWORD=$(echo "$CUSTOM_PASSWORD" | tr -d '\n\r')
-          fi
+          (
+            if [[ "$USE_FREE_CERT" == "true" ]]; then
+              cp "$GITHUB_WORKSPACE/cert/cert.p12" ./cert.p12
+              cp "$GITHUB_WORKSPACE/cert/profile.mobileprovision" ./profile.mobileprovision
+            else
+              echo "$P12_BASE64" | tr -d ' \n\r' | base64 -d > cert.p12
+              echo "$PROV_BASE64" | tr -d ' \n\r' | base64 -d > profile.mobileprovision
+            fi
+          ) &
+          
+          wait
 
-          # کردنەوەی فایلەکە
+          if [[ "$USE_FREE_CERT" == "true" ]]; then CERT_PASSWORD=$(cat "$GITHUB_WORKSPACE/cert/pass.txt" | tr -d '\n\r');
+          else CERT_PASSWORD=$(echo "$CUSTOM_PASSWORD" | tr -d '\n\r'); fi
+
+          # کردنەوەی فایلەکە بەشێوەیەکی سەلامەت بۆ دانانی بڕوانامەی پریمیەم بۆ Ksign
           unzip -q raw_app.ipa
           APP_DIR=$(find Payload -maxdepth 1 -type d -name "*.app" | head -n 1)
 
-          # سڕینەوەی پڵەگینەکان کە ئایفۆن تێک دەدەن لە کاتی ساینکردندا
+          if [[ "$REAL_NAME" == "Ksign" ]]; then
+            mkdir -p "$APP_DIR/signing-assets/PremiumCert"
+            cp cert.p12 "$APP_DIR/signing-assets/PremiumCert/cert.p12"
+            cp profile.mobileprovision "$APP_DIR/signing-assets/PremiumCert/profile.mobileprovision"
+            echo "$CERT_PASSWORD" > "$APP_DIR/signing-assets/PremiumCert/cert.txt"
+          fi
+
+          # سڕینەوەی پڵەگینە زیانبەخشەکان کە دەبنە هۆی وەستانی ئینستاڵ
           rm -rf "$APP_DIR/PlugIns" || true
           rm -rf "$APP_DIR/Extensions" || true
           rm -rf "$APP_DIR/Watch" || true
 
-          cp "$GITHUB_WORKSPACE/icons/$ICON_NAME" "$APP_DIR/CustomIpaBlackIcon.png" || true
-
-          # دروستکردنی ناسنامەیەکی تەواو نوێ بۆ ئەوەی ئایفۆنەکە فێڵ بخوات
-          NEW_BUNDLE_ID="com.ashtemobile.vip.${LOWER_APP}2024"
-
-          # گۆڕینی ناسنامە لەناو دڵی بەرنامەکەدا
-          python3 -c '
-          import plistlib, sys
-          plist_path = sys.argv[1]
-          new_bundle = sys.argv[2]
-          try:
-              with open(plist_path, "rb") as f: pl = plistlib.load(f)
-              pl["CFBundleIdentifier"] = new_bundle
-              pl["CFBundleIcons"] = {"CFBundlePrimaryIcon": {"CFBundleIconFiles": ["CustomIpaBlackIcon"], "UIPrerenderedIcon": True}}
-              if "CFBundleIcons~ipad" in pl: pl["CFBundleIcons~ipad"] = pl["CFBundleIcons"]
-              with open(plist_path, "wb") as f: plistlib.dump(pl, f)
-          except Exception as e:
-              pass
-          ' "$APP_DIR/Info.plist" "$NEW_BUNDLE_ID"
-
           rm raw_app.ipa
           zip -q0ur raw_app.ipa Payload
 
-          # واژۆکردنی بەرنامەکە بە ناسنامە نوێیەکە
-          ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -b "$NEW_BUNDLE_ID" -o "${REAL_NAME}_signed.ipa" raw_app.ipa
+          # دانانی ناسنامەی پاک کە ئایفۆن قبووڵی دەکات
+          NEW_BUNDLE_ID="com.ashtemobile.vip.${LOWER_APP}"
 
+          ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -b "$NEW_BUNDLE_ID" -n "$REAL_NAME" -o "${REAL_NAME}_signed.ipa" raw_app.ipa
+
+          # ⚠️ لێرەدا کێشە گەورەکەمان چارەسەر کرد: ڕاستەوخۆ دەچێتەوە ناو V1 نەک فۆڵدەری تر
           gh release upload V1 "${REAL_NAME}_signed.ipa" --clobber --repo ${{ github.repository }}
