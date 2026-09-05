@@ -43,6 +43,7 @@ jobs:
           elif [[ "$LOWER_APP" == "esign" ]]; then IPA_NAME="Esign.ipa"; REAL_NAME="Esign"; ICON_NAME="Esign.jpeg";
           elif [[ "$LOWER_APP" == "ksign" ]]; then IPA_NAME="Ksign.ipa"; REAL_NAME="Ksign"; ICON_NAME="Ksign.jpeg";
           elif [[ "$LOWER_APP" == "mytv" ]]; then IPA_NAME="MyTV.ipa"; REAL_NAME="MyTV"; ICON_NAME="mytv.jpeg";
+          elif [[ "$LOWER_APP" == "ipaomtk" ]]; then IPA_NAME="IPAOMTK.ipa"; REAL_NAME="IPAOMTK"; ICON_NAME="ipaomtk.jpeg";
           else IPA_NAME="AshteMobile.ipa"; REAL_NAME="AshteMobile"; ICON_NAME="Ashtemobile.jpeg"; fi
 
           wget -qO- https://github.com/zhlynn/zsign/releases/download/v1.0.4/zsign-linux-x86_64.tar.gz | tar -xz
