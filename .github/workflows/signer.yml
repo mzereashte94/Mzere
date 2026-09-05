@@ -113,8 +113,7 @@ jobs:
 
           zip -q0ur raw_app.ipa Payload
           
-          # لێرەدا کۆدی بەندڵ ئایدی (-b) زیادکراوە بۆ ئەوەی بە دروستی لەگەڵ manifest.php کار بکات
-          ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -b "com.ashtemobile.${LOWER_APP}.vip" -o "${REAL_NAME}_signed.ipa" raw_app.ipa
+          # لێرەدا کۆدی (-b)مان سڕییەوە بۆ ئەوەی بەندڵ ئایدییە ئەسڵییەکەی خۆی بمێنێتەوە و تێک نەچێت
+          ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -o "${REAL_NAME}_signed.ipa" raw_app.ipa
 
-          # لێرەدا ناوی فایلە تێکستەکە ڕاستکراوەتەوە بۆ ئەوەی ڕیزبەندییەکەی ناو GitHub جوان بێت
           gh release upload V1 "${REAL_NAME}_signed.ipa" "${REAL_NAME}_bundle_id.txt" --clobber --repo ${{ github.repository }}
