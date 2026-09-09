@@ -1,0 +1,34 @@
+name: Auto Cleanup Signed IPAs
+
+on:
+  workflow_run:
+    workflows: ["Premium Cloud Signer Engine (Ultra Fast)"]
+    types:
+      - completed
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⏳ Wait 5 Minutes
+        run: sleep 300
+
+      - name: 🧹 Delete Old Signed IPAs from Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Checking for old signed IPAs to delete..."
+          
+          # لیستکردن و سڕینەوەی هەموು فایلە ساینکراوە کۆنەکان کە نیشانەی _signed_یان تێدایە
+          OLD_ASSETS=$(gh release view V1 --repo mzereashte94/Mzere --json assets -q ".assets[].name" | grep "_signed_" || echo "none")
+          
+          if [[ "$OLD_ASSETS" != "none" ]]; then
+            for old_asset in $OLD_ASSETS; do
+              if [ -n "$old_asset" ]; then
+                echo "Deleting: $old_asset"
+                gh release delete-asset V1 "$old_asset" -y --repo mzereashte94/Mzere || true
+              fi
+            done
+          fi
+          
+          echo "✅ Cleanup completed successfully!"
