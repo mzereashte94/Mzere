@@ -105,11 +105,3 @@ jobs:
           fi
 
           gh release upload V1 "$FINAL_IPA_NAME" --repo mzereashte94/Mzere || { echo "❌ ERROR: Failed to upload!"; exit 1; }
-
-          # ⏳ سڕینەوەی ئۆتۆماتیکی دوای ٥ خولەک
-          echo "⏳ Waiting 5 minutes (300 seconds) for the user to install..."
-          sleep 300
-          
-          echo "🧹 Deleting $FINAL_IPA_NAME from GitHub..."
-          gh release delete-asset V1 "$FINAL_IPA_NAME" -y --repo mzereashte94/Mzere || true
-          echo "✅ Done!"
