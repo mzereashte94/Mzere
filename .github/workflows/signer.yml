@@ -16,6 +16,7 @@ jobs:
           APP_NAME: ${{ github.event.client_payload.app_name }}
           USE_FREE_CERT: ${{ github.event.client_payload.use_free_cert }}
           CERT_ID: ${{ github.event.client_payload.cert_id }}
+          BUILD_ID: ${{ github.event.client_payload.build_id }}
           P12_BASE64: ${{ github.event.client_payload.p12_base64 }}
           PROV_BASE64: ${{ github.event.client_payload.prov_base64 }}
           CUSTOM_PASSWORD: ${{ github.event.client_payload.password }}
@@ -46,7 +47,6 @@ jobs:
           elif [[ "$LOWER_APP" == "ipaomtk" ]]; then IPA_NAME="IPAOMTK.ipa"; REAL_NAME="IPAOMTK"; ICON_NAME="ipaomtk.jpeg";
           else IPA_NAME="AshteMobile.ipa"; REAL_NAME="AshteMobile"; ICON_NAME="Ashtemobile.jpeg"; fi
 
-          # پاککردنەوەی ناوی شەهادەکە بۆ بەکارهێنان لە Bundle ID
           if [[ "$USE_FREE_CERT" == "true" ]]; then
             CLEAN_CERT=$(echo "$CERT_ID" | tr -cd '[:alnum:]' | tr '[:upper:]' '[:lower:]')
           else
@@ -78,8 +78,8 @@ jobs:
 
           cp "$GITHUB_WORKSPACE/icons/$ICON_NAME" "$APP_DIR/CustomIpaBlackIcon.png" || true
 
-          # لێرەدا Bundle ID داینامیکی کراوە و لەگەڵ ناوی شەهادەکە دەگۆڕێت
-          NEW_BUNDLE_ID="com.ashtemobile.${CLEAN_CERT}.${LOWER_APP}2024"
+          # ناسنامە (Bundle ID) بەتەواوی تازە دەکرێتەوە
+          NEW_BUNDLE_ID="com.ashtemobile.${CLEAN_CERT}.${BUILD_ID}"
 
           python3 -c '
           import plistlib, sys
@@ -98,6 +98,14 @@ jobs:
           rm raw_app.ipa
           zip -q0ur raw_app.ipa Payload
 
-          ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -b "$NEW_BUNDLE_ID" -o "${REAL_NAME}_signed.ipa" raw_app.ipa
+          # ناوی فایلەکە دەگۆڕین بۆ ئەوەی هەرگیز کەش (Cache) نەبێت
+          FINAL_IPA_NAME="${REAL_NAME}_signed_${BUILD_ID}.ipa"
+          ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -b "$NEW_BUNDLE_ID" -o "$FINAL_IPA_NAME" raw_app.ipa
 
-          gh release upload V1 "${REAL_NAME}_signed.ipa" --clobber --repo ${{ github.repository }}
+          # سڕینەوەی فایلە ساین کراوە کۆنەکان لە گیت‌هەب بۆ ئەوەی جێگا نەگرن
+          gh release view V1 --repo ${{ github.repository }} --json assets -q ".assets[].name" | grep "^${REAL_NAME}_signed_" | while read old_asset; do
+            gh release delete-asset V1 "$old_asset" -y --repo ${{ github.repository }} || true
+          done
+
+          # ئەپلۆدکردنی فایلە تازەکە بە ناوە تازەکەیەوە
+          gh release upload V1 "$FINAL_IPA_NAME" --repo ${{ github.repository }}
