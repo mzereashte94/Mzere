@@ -46,6 +46,13 @@ jobs:
           elif [[ "$LOWER_APP" == "ipaomtk" ]]; then IPA_NAME="IPAOMTK.ipa"; REAL_NAME="IPAOMTK"; ICON_NAME="ipaomtk.jpeg";
           else IPA_NAME="AshteMobile.ipa"; REAL_NAME="AshteMobile"; ICON_NAME="Ashtemobile.jpeg"; fi
 
+          # پاککردنەوەی ناوی شەهادەکە بۆ بەکارهێنان لە Bundle ID
+          if [[ "$USE_FREE_CERT" == "true" ]]; then
+            CLEAN_CERT=$(echo "$CERT_ID" | tr -cd '[:alnum:]' | tr '[:upper:]' '[:lower:]')
+          else
+            CLEAN_CERT="customvip"
+          fi
+
           wget -qO- https://github.com/zhlynn/zsign/releases/download/v1.0.4/zsign-linux-x86_64.tar.gz | tar -xz
           chmod +x zsign
           
@@ -62,21 +69,18 @@ jobs:
             CERT_PASSWORD=$(echo "$CUSTOM_PASSWORD" | tr -d '\n\r')
           fi
 
-          # کردنەوەی فایلەکە
           unzip -q raw_app.ipa
           APP_DIR=$(find Payload -maxdepth 1 -type d -name "*.app" | head -n 1)
 
-          # سڕینەوەی پڵەگینەکان کە ئایفۆن تێک دەدەن لە کاتی ساینکردندا
           rm -rf "$APP_DIR/PlugIns" || true
           rm -rf "$APP_DIR/Extensions" || true
           rm -rf "$APP_DIR/Watch" || true
 
           cp "$GITHUB_WORKSPACE/icons/$ICON_NAME" "$APP_DIR/CustomIpaBlackIcon.png" || true
 
-          # دروستکردنی ناسنامەیەکی تەواو نوێ بۆ ئەوەی ئایفۆنەکە فێڵ بخوات
-          NEW_BUNDLE_ID="com.ashtemobile.vip.${LOWER_APP}2024"
+          # لێرەدا Bundle ID داینامیکی کراوە و لەگەڵ ناوی شەهادەکە دەگۆڕێت
+          NEW_BUNDLE_ID="com.ashtemobile.${CLEAN_CERT}.${LOWER_APP}2024"
 
-          # گۆڕینی ناسنامە لەناو دڵی بەرنامەکەدا
           python3 -c '
           import plistlib, sys
           plist_path = sys.argv[1]
@@ -94,7 +98,6 @@ jobs:
           rm raw_app.ipa
           zip -q0ur raw_app.ipa Payload
 
-          # واژۆکردنی بەرنامەکە بە ناسنامە نوێیەکە
           ./zsign -q -k cert.p12 -p "$CERT_PASSWORD" -m profile.mobileprovision -b "$NEW_BUNDLE_ID" -o "${REAL_NAME}_signed.ipa" raw_app.ipa
 
           gh release upload V1 "${REAL_NAME}_signed.ipa" --clobber --repo ${{ github.repository }}
